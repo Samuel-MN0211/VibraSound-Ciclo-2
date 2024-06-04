@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'metronome_instance.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -8,11 +9,17 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Metronome App')),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/multiple_metronomes');
-          },
-          child: const Text('Go to Multiple Metronomes'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            MetronomeInstance(),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/multiple_metronomes');
+              },
+              child: const Text('Go to Multiple Metronomes'),
+            )
+          ],
         ),
       ),
     );
