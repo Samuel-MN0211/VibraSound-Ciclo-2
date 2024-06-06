@@ -2,16 +2,18 @@ import 'dart:async';
 
 class Metronome {
   int bpm;
+  int clicksPerBeat;
   Timer? _timer;
   Function? _onTick;
   bool _isPlaying = false;
 
-  Metronome({this.bpm = 120});
+  Metronome({required this.bpm, this.clicksPerBeat = 1});
 
   void start() {
     if (_isPlaying) return;
     _isPlaying = true;
-    _timer = Timer.periodic(Duration(milliseconds: 60000 ~/ bpm), (_) {
+    int interval = (60000 / bpm).round();
+    _timer = Timer.periodic(Duration(milliseconds: interval), (timer) {
       _onTick?.call();
     });
   }
@@ -27,6 +29,10 @@ class Metronome {
       stop();
       start();
     }
+  }
+
+  void setClicksPerBeat(int clicks) {
+    clicksPerBeat = clicks;
   }
 
   void onTick(Function callback) {

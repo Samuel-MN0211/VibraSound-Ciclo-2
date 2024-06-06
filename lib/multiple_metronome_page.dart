@@ -19,11 +19,10 @@ class MultipleMetronomePageState extends State<MultipleMetronomePage> {
 
   void _addMetronome() {
     setState(() {
-      _metronomes.add(MetronomeInstance(key: UniqueKey()));
+      _metronomes.add(const MetronomeInstance());
     });
   }
 
-  // Tornar o método público para acesso externo
   void removeMetronome(Key key) {
     setState(() {
       _metronomes.removeWhere((element) => element.key == key);

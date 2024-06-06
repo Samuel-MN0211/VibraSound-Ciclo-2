@@ -12,7 +12,7 @@ class HomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            MetronomeInstance(),
+            const MetronomeInstance(),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/multiple_metronomes');
