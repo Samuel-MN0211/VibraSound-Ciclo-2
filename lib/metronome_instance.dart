@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
+import 'package:vibration/vibration.dart';
 import 'metronome.dart';
 import 'multiple_metronome_page.dart'; // Importar para acessar o estado
 
@@ -31,12 +32,18 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
 
   void _onTick() {
     _currentTick++;
+    int interval = (60000 / (_bpm * _clicksPerBeat)).round();
+    int vibrationDuration = interval ~/ 2;
+
     if (_currentTick % _clicksPerBeat == 1) {
       _currentCycle++;
       _changeToBlack();
+      vibrationDuration = (interval * 0.8).round();
     } else {
       _changeToRandomColor();
     }
+
+    Vibration.vibrate(duration: vibrationDuration);
 
     if (_currentCycle > _beatsPerMeasure) {
       _currentCycle = 1;
