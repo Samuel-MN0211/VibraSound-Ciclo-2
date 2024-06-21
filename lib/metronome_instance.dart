@@ -49,7 +49,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
       _torchOn(_isTorchOn, vibrationDuration);
     }
 
-    Vibration.vibrate(duration: vibrationDuration);
+    _vibrateOn(_isVibrating, vibrationDuration);
 
     if (_currentCycle > _beatsPerMeasure) {
       _currentCycle = 1;
@@ -60,6 +60,12 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     setState(() {
       _backgroundColor = Colors.black;
     });
+  }
+
+  void _vibrateOn(bool isVibratingOn, int vibrationDuration) {
+    if (isVibratingOn) {
+      Vibration.vibrate(duration: vibrationDuration);
+    }
   }
 
   void _torchOn(bool isTorchOn, int vibrationDuration) {
@@ -75,6 +81,12 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     setState(() {
       _backgroundColor =
           Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+    });
+  }
+
+  void _toggleIsVibrateOn() {
+    setState(() {
+      _isVibrating = !_isVibrating;
     });
   }
 
@@ -186,6 +198,11 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
               IconButton(
                   onPressed: _toggleIsTorchOn,
                   icon: Icon(_isTorchOn ? Icons.flash_on : Icons.flash_off)),
+              IconButton(
+                  onPressed: _toggleIsVibrateOn,
+                  icon: Icon(_isVibrating
+                      ? Icons.vibration_rounded
+                      : Icons.vibration)),
             ],
           ),
         ),
