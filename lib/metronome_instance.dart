@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:vibration/vibration.dart';
 import 'metronome.dart';
 import 'multiple_metronome_page.dart'; // Importar para acessar o estado
+import 'package:torch_controller/torch_controller.dart';
 
 class MetronomeInstance extends StatefulWidget {
   const MetronomeInstance({Key? key}) : super(key: key);
@@ -13,11 +14,14 @@ class MetronomeInstance extends StatefulWidget {
 }
 
 class MetronomeInstanceState extends State<MetronomeInstance> {
+  final TorchController _torchController = TorchController();
   late Metronome _metronome;
   int _bpm = 120;
   int _beatsPerMeasure = 4;
   int _clicksPerBeat = 3;
   bool _isPlaying = false;
+  bool _isTorchOn = false;
+  bool _isVibrating = false;
   Color _backgroundColor = Colors.white;
   Timer? _clickTimer;
   int _currentTick = 0;
@@ -39,8 +43,10 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
       _currentCycle++;
       _changeToBlack();
       vibrationDuration = (interval * 0.8).round();
+      _torchOn(_isTorchOn, vibrationDuration);
     } else {
       _changeToRandomColor();
+      _torchOn(_isTorchOn, vibrationDuration);
     }
 
     Vibration.vibrate(duration: vibrationDuration);
@@ -56,10 +62,25 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     });
   }
 
+  void _torchOn(bool isTorchOn, int vibrationDuration) {
+    if (isTorchOn) {
+      _torchController.toggle(intensity: 1);
+      Future.delayed(Duration(milliseconds: vibrationDuration), () {
+        _torchController.toggle();
+      });
+    }
+  }
+
   void _changeToRandomColor() {
     setState(() {
       _backgroundColor =
           Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+    });
+  }
+
+  void _toggleIsTorchOn() {
+    setState(() {
+      _isTorchOn = !_isTorchOn;
     });
   }
 
@@ -162,6 +183,9 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
                     .findAncestorStateOfType<MultipleMetronomePageState>()
                     ?.removeMetronome(widget.key!),
               ),
+              IconButton(
+                  onPressed: _toggleIsTorchOn,
+                  icon: Icon(_isTorchOn ? Icons.flash_on : Icons.flash_off)),
             ],
           ),
         ),

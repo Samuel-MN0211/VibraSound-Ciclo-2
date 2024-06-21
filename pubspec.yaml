@@ -7,6 +7,7 @@ environment:
   sdk: '>=3.2.3 <4.0.0'
 
 dependencies:
+  torch_controller: ^2.0.1
   audioplayers: ^5.2.1
   flutter:
     sdk: flutter

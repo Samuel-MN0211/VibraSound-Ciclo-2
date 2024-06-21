@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:torch_controller/torch_controller.dart';
 import 'home_page.dart';
 import 'multiple_metronome_page.dart';
 
 void main() {
+  TorchController().initialize();
   runApp(const MetronomeApp());
 }
 
