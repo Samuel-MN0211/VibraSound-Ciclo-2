@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:vibration/vibration.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'metronome.dart';
 import 'multiple_metronome_page.dart'; // Importar para acessar o estado
 import 'package:torch_controller/torch_controller.dart';
+import 'dart:collection'; // Import necessário para a Queue
 
 class MetronomeInstance extends StatefulWidget {
   const MetronomeInstance({Key? key}) : super(key: key);
@@ -21,17 +23,49 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   int _clicksPerBeat = 3;
   bool _isPlaying = false;
   bool _isTorchOn = false;
-  bool _isVibrating = false;
+  bool _isVibrating = true;
   Color _backgroundColor = Colors.white;
   Timer? _clickTimer;
   int _currentTick = 0;
   int _currentCycle = 0;
+  late Queue<AudioPlayer> _clickPlayers;
+  late Queue<AudioPlayer> _specialClickPlayers;
+  late Duration _clickDuration;
+  late Duration _specialClickDuration;
 
   @override
   void initState() {
     super.initState();
     _metronome = Metronome(bpm: _bpm, clicksPerBeat: _clicksPerBeat);
     _metronome.onTick(_onTick);
+    _preloadSounds();
+  }
+
+  void _preloadSounds() {
+    _clickPlayers = Queue<AudioPlayer>.from(List.generate(
+        10, (_) => AudioPlayer()..setSource(AssetSource('clique.wav'))));
+    _specialClickPlayers = Queue<AudioPlayer>.from(List.generate(
+        10, (_) => AudioPlayer()..setSource(AssetSource('tick.wav'))));
+
+    _clickPlayers.first.onDurationChanged.listen((Duration d) {
+      setState(() => _clickDuration = d);
+    });
+
+    _specialClickPlayers.first.onDurationChanged.listen((Duration d) {
+      setState(() => _specialClickDuration = d);
+    });
+  }
+
+  void _playSound(
+      Queue<AudioPlayer> players, Duration duration, String audioFile) {
+    final player = players.removeFirst();
+    player.seek(Duration.zero);
+    player.resume();
+
+    Future.delayed(duration * 0.95, () {
+      player.stop();
+      players.addLast(AudioPlayer()..setSource(AssetSource(audioFile)));
+    });
   }
 
   void _onTick() {
@@ -44,9 +78,11 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
       _changeToBlack();
       vibrationDuration = (interval * 0.8).round();
       _torchOn(_isTorchOn, vibrationDuration);
+      _playSound(_specialClickPlayers, _specialClickDuration, 'tick.wav');
     } else {
       _changeToRandomColor();
       _torchOn(_isTorchOn, vibrationDuration);
+      _playSound(_clickPlayers, _clickDuration, 'clique.wav');
     }
 
     _vibrateOn(_isVibrating, vibrationDuration);
