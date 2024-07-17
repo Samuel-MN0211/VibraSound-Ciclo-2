@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   vibration: ^1.9.0
+  google_fonts: ^6.2.0
 
 dev_dependencies:
   flutter_test:
@@ -19,7 +20,15 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 
 flutter:
-
+  fonts:
+    - family: BellotaText
+      fonts:
+        - asset: fonts/BellotaText-Regular.ttf
+        - asset: fonts/BellotaText-Italic.ttf
+        - asset: fonts/BellotaText-Bold.ttf
+        - asset: fonts/BellotaText-BoldItalic.ttf
+        - asset: fonts/BellotaText-Light.ttf
+        - asset: fonts/BellotaText-LightItalic.ttf
   assets:
     - assets\clique.wav
     - assets\tick.wav

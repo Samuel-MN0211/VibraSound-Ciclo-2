@@ -24,7 +24,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   bool _isPlaying = false;
   bool _isTorchOn = false;
   bool _isVibrating = true;
-  Color _backgroundColor = Colors.white;
+  Color _backgroundColor = Color(0xFF095169);
   Timer? _clickTimer;
   int _currentTick = 0;
   int _currentCycle = 0;
@@ -32,6 +32,56 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   late Queue<AudioPlayer> _specialClickPlayers;
   late Duration _clickDuration;
   late Duration _specialClickDuration;
+
+  // Getters and Setters
+  int get bpm => _bpm;
+  set bpm(int value) {
+    setState(() {
+      _bpm = value;
+    });
+  }
+
+  int get beatsPerMeasure => _beatsPerMeasure;
+  set beatsPerMeasure(int value) {
+    setState(() {
+      _beatsPerMeasure = value;
+    });
+  }
+
+  int get clicksPerBeat => _clicksPerBeat;
+  set clicksPerBeat(int value) {
+    setState(() {
+      _clicksPerBeat = value;
+    });
+  }
+
+  bool get isPlaying => _isPlaying;
+  set isPlaying(bool value) {
+    setState(() {
+      _isPlaying = value;
+    });
+  }
+
+  bool get isTorchOn => _isTorchOn;
+  set isTorchOn(bool value) {
+    setState(() {
+      _isTorchOn = value;
+    });
+  }
+
+  bool get isVibrating => _isVibrating;
+  set isVibrating(bool value) {
+    setState(() {
+      _isVibrating = value;
+    });
+  }
+
+  Color get backgroundColor => _backgroundColor;
+  set backgroundColor(Color value) {
+    setState(() {
+      _backgroundColor = value;
+    });
+  }
 
   @override
   void initState() {
@@ -156,103 +206,319 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          color: _backgroundColor,
-          padding: const EdgeInsets.all(10),
-          margin: const EdgeInsets.symmetric(vertical: 5),
-          child: Column(
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          BpmSetter(
+            bpm: _bpm,
+            onBpmChanged: (newBpm) => bpm = newBpm,
+          ),
+          Container(
+              height: 240,
+              width: 240,
+              decoration: BoxDecoration(
+                color: _backgroundColor,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.black, width: 1),
+              )),
+          Padding(padding: EdgeInsets.all(12)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text('BPM: $_bpm',
-                  style: TextStyle(
-                      color: _backgroundColor.computeLuminance() > 0.5
-                          ? Colors.black
-                          : Colors.white)),
-              Slider(
-                value: _bpm.toDouble(),
-                min: 30,
-                max: 300,
-                divisions: 270,
-                onChanged: (value) {
-                  setState(() {
-                    _bpm = value.toInt();
-                    if (_isPlaying) {
-                      _metronome.setBPM(_bpm);
-                    }
-                  });
-                },
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Column(
                 children: [
-                  DropdownButton<int>(
-                    value: _beatsPerMeasure,
-                    items: List.generate(12, (index) => index + 1)
-                        .map<DropdownMenuItem<int>>((int value) {
-                      return DropdownMenuItem<int>(
-                        value: value,
-                        child: Text('$value Beats'),
-                      );
-                    }).toList(),
-                    onChanged: (int? newValue) {
-                      setState(() {
-                        _beatsPerMeasure = newValue!;
-                      });
-                    },
+                  Text(
+                    'Compasso',
+                    style: TextStyle(fontSize: 22),
                   ),
-                  DropdownButton<int>(
-                    value: _clicksPerBeat,
-                    items: List.generate(8, (index) => index + 1)
-                        .map<DropdownMenuItem<int>>((int value) {
-                      return DropdownMenuItem<int>(
-                        value: value,
-                        child: Text('$value Clicks'),
-                      );
-                    }).toList(),
-                    onChanged: (int? newValue) {
-                      setState(() {
-                        _clicksPerBeat = newValue!;
-                        if (_isPlaying) {
-                          _metronome.setClicksPerBeat(_clicksPerBeat);
-                        }
-                      });
-                    },
+                  ValueSetter(
+                    value: _beatsPerMeasure,
+                    onValueChanged: (newValue) => beatsPerMeasure = newValue,
                   ),
                 ],
               ),
-              IconButton(
-                icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                onPressed: _togglePlayPause,
+              Column(
+                children: [
+                  Text('Batidas', style: TextStyle(fontSize: 22)),
+                  ValueSetter(
+                    value: _clicksPerBeat,
+                    onValueChanged: (newValue) => clicksPerBeat = newValue,
+                  ),
+                ],
               ),
-              IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () => (context as Element)
-                    .findAncestorStateOfType<MultipleMetronomePageState>()
-                    ?.removeMetronome(widget.key!),
-              ),
-              IconButton(
-                  onPressed: _toggleIsTorchOn,
-                  icon: Icon(_isTorchOn ? Icons.flash_on : Icons.flash_off)),
-              IconButton(
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Positioned(
+                child: IconButton(
                   onPressed: _toggleIsVibrateOn,
-                  icon: Icon(_isVibrating
-                      ? Icons.vibration_rounded
-                      : Icons.vibration)),
+                  icon: Icon(
+                    Icons.vibration,
+                    color: _isVibrating ? Colors.black : Colors.grey,
+                  ),
+                  iconSize: 36,
+                ),
+              ),
+              IconButton(
+                onPressed: _togglePlayPause,
+                icon: Container(
+                  height: 75,
+                  width: 75,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.black, width: 3),
+                  ),
+                  child: Icon(
+                    _isPlaying ? Icons.pause : Icons.play_arrow,
+                    color: Colors.white,
+                  ),
+                ),
+                iconSize: 50,
+              ),
+              IconButton(
+                onPressed: _toggleIsTorchOn,
+                icon: Icon(
+                  _isTorchOn ? Icons.lightbulb : Icons.lightbulb_outline,
+                  color: _isTorchOn ? Colors.black : Colors.grey,
+                ),
+                iconSize: 36,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ValueSetter extends StatefulWidget {
+  final int value;
+  final ValueChanged<int> onValueChanged;
+
+  ValueSetter({required this.value, required this.onValueChanged});
+
+  @override
+  _ValueSetterState createState() => _ValueSetterState();
+}
+
+class _ValueSetterState extends State<ValueSetter> {
+  late int _currentValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentValue = widget.value;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          onPressed: () => setState(() {
+            _currentValue -= 1;
+            widget.onValueChanged(_currentValue);
+          }),
+          icon: Icon(Icons.remove),
+          iconSize: 28,
+        ),
+        Container(
+          child: Text(
+            '$_currentValue',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'BellotaText',
+            ),
+          ),
+        ),
+        IconButton(
+          onPressed: () => setState(() {
+            _currentValue += 1;
+            widget.onValueChanged(_currentValue);
+          }),
+          icon: Icon(Icons.add),
+          iconSize: 25,
+        ),
+      ],
+    );
+  }
+}
+
+class BpmSetter extends StatefulWidget {
+  final int bpm;
+  final ValueChanged<int> onBpmChanged;
+
+  BpmSetter({required this.bpm, required this.onBpmChanged});
+
+  @override
+  _BpmSetterState createState() => _BpmSetterState();
+}
+
+class _BpmSetterState extends State<BpmSetter> {
+  late int _bpm;
+
+  @override
+  void initState() {
+    super.initState();
+    _bpm = widget.bpm;
+  }
+
+  void _updateBpm(int value) {
+    setState(() {
+      _bpm += value;
+      widget.onBpmChanged(_bpm);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(70.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: () => _updateBpm(-1),
+                icon: Icon(Icons.remove),
+                iconSize: 48,
+              ),
+              Container(
+                child: Text(
+                  '$_bpm',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 58,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'BellotaText',
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: () => _updateBpm(1),
+                icon: Icon(Icons.add),
+                iconSize: 48,
+              ),
             ],
           ),
         ),
         Positioned(
-          top: 10,
-          right: 10,
-          child: CircleAvatar(
-            backgroundColor: Colors.red,
-            child: Text(
-              '$_currentCycle',
-              style: const TextStyle(color: Colors.white),
+          top: 35,
+          right: 45,
+          child: GestureDetector(
+            onTap: () => _updateBpm(10),
+            child: Container(
+              width: 55,
+              height: 45,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.rectangle,
+                border: Border.all(color: Colors.black),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  '+10',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
+        Positioned(
+          top: 35,
+          left: 45,
+          child: GestureDetector(
+            onTap: () => _updateBpm(-10),
+            child: Container(
+              width: 55,
+              height: 45,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.rectangle,
+                border: Border.all(color: Colors.black),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  '-10',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 35,
+          right: 45,
+          child: GestureDetector(
+            onTap: () => _updateBpm(5),
+            child: Container(
+              width: 55,
+              height: 45,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.rectangle,
+                border: Border.all(color: Colors.black),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  '+5',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 35,
+          left: 45,
+          child: GestureDetector(
+            onTap: () => _updateBpm(-5),
+            child: Container(
+              width: 55,
+              height: 45,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.rectangle,
+                border: Border.all(color: Colors.black),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  '-5',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 45,
+          child: Text('BPM', style: TextStyle(color: Colors.black)),
+        )
       ],
     );
   }
