@@ -9,7 +9,9 @@ import 'package:torch_controller/torch_controller.dart';
 import 'dart:collection'; // Import necessário para a Queue
 
 class MetronomeInstance extends StatefulWidget {
-  const MetronomeInstance({Key? key}) : super(key: key);
+  final Function? onStateChanged;
+
+  const MetronomeInstance({Key? key, this.onStateChanged}) : super(key: key);
 
   @override
   MetronomeInstanceState createState() => MetronomeInstanceState();
@@ -59,6 +61,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   set isPlaying(bool value) {
     setState(() {
       _isPlaying = value;
+      widget.onStateChanged?.call();
     });
   }
 
@@ -80,6 +83,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   set backgroundColor(Color value) {
     setState(() {
       _backgroundColor = value;
+      widget.onStateChanged?.call(); // Notificar sobre a mudança de cor
     });
   }
 
@@ -144,7 +148,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
 
   void _changeToBlack() {
     setState(() {
-      _backgroundColor = Colors.black;
+      backgroundColor = Colors.black;
     });
   }
 
@@ -165,7 +169,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
 
   void _changeToRandomColor() {
     setState(() {
-      _backgroundColor =
+      backgroundColor =
           Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
     });
   }
@@ -193,7 +197,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
         _metronome.setClicksPerBeat(_clicksPerBeat);
         _metronome.start();
       }
-      _isPlaying = !_isPlaying;
+      isPlaying = !_isPlaying;
     });
   }
 
@@ -210,55 +214,62 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          BpmSetter(
-            bpm: _bpm,
-            onBpmChanged: (newBpm) => bpm = newBpm,
-          ),
+          _isPlaying
+              ? SizedBox.shrink()
+              : BpmSetter(
+                  bpm: _bpm,
+                  onBpmChanged: (newBpm) => bpm = newBpm,
+                ),
           Container(
               height: 240,
               width: 240,
               decoration: BoxDecoration(
                 color: _backgroundColor,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.black, width: 1),
               )),
           Padding(padding: EdgeInsets.all(12)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Column(
-                children: [
-                  Text(
-                    'Compasso',
-                    style: TextStyle(fontSize: 22),
-                  ),
-                  ValueSetter(
-                    value: _beatsPerMeasure,
-                    onValueChanged: (newValue) => beatsPerMeasure = newValue,
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Text('Batidas', style: TextStyle(fontSize: 22)),
-                  ValueSetter(
-                    value: _clicksPerBeat,
-                    onValueChanged: (newValue) => clicksPerBeat = newValue,
-                  ),
-                ],
-              ),
-            ],
-          ),
+          _isPlaying
+              ? SizedBox.shrink()
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          'Compasso',
+                          style: TextStyle(fontSize: 22),
+                        ),
+                        ValueSetter(
+                          value: _beatsPerMeasure,
+                          onValueChanged: (newValue) =>
+                              beatsPerMeasure = newValue,
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Text('Batidas', style: TextStyle(fontSize: 22)),
+                        ValueSetter(
+                          value: _clicksPerBeat,
+                          onValueChanged: (newValue) =>
+                              clicksPerBeat = newValue,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Positioned(
                 child: IconButton(
                   onPressed: _toggleIsVibrateOn,
-                  icon: Icon(
-                    Icons.vibration,
-                    color: _isVibrating ? Colors.black : Colors.grey,
-                  ),
+                  icon: _isPlaying
+                      ? Icon(null)
+                      : Icon(
+                          Icons.vibration,
+                          color: _isVibrating ? Colors.black : Colors.grey,
+                        ),
                   iconSize: 36,
                 ),
               ),
@@ -281,10 +292,12 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
               ),
               IconButton(
                 onPressed: _toggleIsTorchOn,
-                icon: Icon(
-                  _isTorchOn ? Icons.lightbulb : Icons.lightbulb_outline,
-                  color: _isTorchOn ? Colors.black : Colors.grey,
-                ),
+                icon: _isPlaying
+                    ? Icon(null)
+                    : Icon(
+                        _isTorchOn ? Icons.lightbulb : Icons.lightbulb_outline,
+                        color: _isTorchOn ? Colors.black : Colors.grey,
+                      ),
                 iconSize: 36,
               ),
             ],
@@ -364,6 +377,10 @@ class BpmSetter extends StatefulWidget {
 class _BpmSetterState extends State<BpmSetter> {
   late int _bpm;
 
+  final GlobalKey<MetronomeInstanceState> _metronomeKey =
+      GlobalKey<MetronomeInstanceState>();
+  bool _isPlaying = false;
+
   @override
   void initState() {
     super.initState();
@@ -383,15 +400,17 @@ class _BpmSetterState extends State<BpmSetter> {
       alignment: Alignment.center,
       children: [
         Padding(
-          padding: const EdgeInsets.all(70.0),
+          padding: const EdgeInsets.fromLTRB(20, 70, 20, 70),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
-                onPressed: () => _updateBpm(-1),
-                icon: Icon(Icons.remove),
-                iconSize: 48,
-              ),
+              _isPlaying
+                  ? Icon(null)
+                  : IconButton(
+                      onPressed: () => _updateBpm(-1),
+                      icon: Icon(Icons.remove),
+                      iconSize: 48,
+                    ),
               Container(
                 child: Text(
                   '$_bpm',
@@ -465,7 +484,7 @@ class _BpmSetterState extends State<BpmSetter> {
         ),
         Positioned(
           bottom: 35,
-          right: 45,
+          right: 50,
           child: GestureDetector(
             onTap: () => _updateBpm(5),
             child: Container(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'metronome_instance.dart';
+import 'side_menu.dart' as side_menu;
 
 void main() => runApp(const MetronomeApp());
 
@@ -18,247 +19,84 @@ class MetronomeApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF095169),
-        surfaceTintColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.white),
-        centerTitle: true,
-        title: const Text(
-          'Vibrasom',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 32.0,
-            fontFamily: 'BellotaText',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      drawer: const NavigationDrawer(),
-      body: const MetronomeInstance(),
-    );
-  }
+  _HomePageState createState() => _HomePageState();
 }
 
-class NavigationDrawer extends StatelessWidget {
-  const NavigationDrawer({Key? key}) : super(key: key);
+class _HomePageState extends State<HomePage> {
+  final GlobalKey<MetronomeInstanceState> _metronomeKey =
+      GlobalKey<MetronomeInstanceState>();
+  bool _isPlaying = false;
+  Color _backgroundColor = const Color(0xFF095169);
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _updateBackgroundColor() {
+    setState(() {
+      _backgroundColor = _metronomeKey.currentState?.backgroundColor ??
+          const Color(0xFF095169);
+    });
+  }
+
+  void _updateIsPlaying() {
+    setState(() {
+      _isPlaying = _metronomeKey.currentState?.isPlaying ?? false;
+      _updateBackgroundColor();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Color(0xFF095169),
-            ),
-            child: Text(
+    return Stack(alignment: Alignment.center, children: [
+      Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        color: _backgroundColor,
+      ),
+      AnimatedContainer(
+        curve: Curves.easeInQuart,
+        duration: const Duration(milliseconds: 350),
+        width: _isPlaying
+            ? MediaQuery.of(context).size.width * 0.85
+            : MediaQuery.of(context).size.width,
+        height: _isPlaying
+            ? MediaQuery.of(context).size.height * 0.85
+            : MediaQuery.of(context).size.height,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF095169),
+            iconTheme: _isPlaying
+                ? IconThemeData(color: Colors.transparent)
+                : IconThemeData(color: Colors.white),
+            centerTitle: true,
+            title: const Text(
               'Vibrasom',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: 32.0,
+                fontFamily: 'BellotaText',
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          ListTile(
-            title: const Text('Metronome'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HomePage()),
-              );
-            },
+          drawer: const side_menu.NavigationDrawer(),
+          body: Center(
+            child: MetronomeInstance(
+              key: _metronomeKey,
+              onStateChanged: () {
+                _updateIsPlaying();
+                _updateBackgroundColor();
+              },
+            ),
           ),
-          ListTile(
-            title: const Text('Settings'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HomePage()),
-              );
-            },
-          ),
-        ],
+        ),
       ),
-    );
+    ]);
   }
 }
-
-
-
-
-
-
-// class MetronomeScreen extends StatefulWidget {
-//   const MetronomeScreen({super.key});
-
-//   @override
-//   _MetronomeScreenState createState() => _MetronomeScreenState();
-// }
-
-// class _MetronomeScreenState extends State<MetronomeScreen> {
-//   int bpm = 150;
-//   int compass = 1;
-//   int batidas = 3;
-//   bool isPlaying = false;
-
-//   void _increaseBPM(int increment) {
-//     setState(() {
-//       bpm += increment;
-//     });
-//   }
-
-//   void _decreaseBPM(int decrement) {
-//     setState(() {
-//       bpm -= decrement;
-//     });
-//   }
-
-//   void _togglePlayPause() {
-//     setState(() {
-//       isPlaying = !isPlaying;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(vertical: 20.0),
-//       child: Column(
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         children: [
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//             children: [
-//               _buildBPMButton(-10),
-//               _buildBPMButton(-5),
-//               Text(
-//                 '$bpm BPM',
-//                 style:
-//                     const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
-//               ),
-//               _buildBPMButton(5),
-//               _buildBPMButton(10),
-//             ],
-//           ),
-//           const SizedBox(height: 20),
-//           _buildCentralCircle(),
-//           const SizedBox(height: 20),
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//             children: [
-//               _buildSettingRow(
-//                   'Compasso', compass, _increaseCompass, _decreaseCompass),
-//               _buildSettingRow(
-//                   'Batidas', batidas, _increaseBatidas, _decreaseBatidas),
-//             ],
-//           ),
-//           const SizedBox(height: 20),
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.center,
-//             children: [
-//               IconButton(
-//                 icon: const Icon(Icons.timer),
-//                 onPressed: () {},
-//                 iconSize: 40,
-//               ),
-//               IconButton(
-//                 icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-//                 onPressed: _togglePlayPause,
-//                 iconSize: 40,
-//               ),
-//               IconButton(
-//                 icon: const Icon(Icons.settings),
-//                 onPressed: () {},
-//                 iconSize: 40,
-//               ),
-//             ],
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _buildBPMButton(int value) {
-//     return ElevatedButton(
-//       onPressed: () {
-//         if (value > 0) {
-//           _increaseBPM(value);
-//         } else {
-//           _decreaseBPM(-value);
-//         }
-//       },
-//       child: Text(value.toString()),
-//     );
-//   }
-
-//   Widget _buildCentralCircle() {
-//     return Container(
-//       width: 200,
-//       height: 200,
-//       decoration: BoxDecoration(
-//         color: Colors.teal,
-//         shape: BoxShape.circle,
-//       ),
-//     );
-//   }
-
-//   Widget _buildSettingRow(
-//       String label, int value, VoidCallback increment, VoidCallback decrement) {
-//     return Column(
-//       children: [
-//         Text(
-//           label,
-//           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-//         ),
-//         Row(
-//           children: [
-//             IconButton(
-//               icon: const Icon(Icons.remove),
-//               onPressed: decrement,
-//               iconSize: 30,
-//             ),
-//             Text(
-//               value.toString(),
-//               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-//             ),
-//             IconButton(
-//               icon: const Icon(Icons.add),
-//               onPressed: increment,
-//               iconSize: 30,
-//             ),
-//           ],
-//         ),
-//       ],
-//     );
-//   }
-
-//   void _increaseCompass() {
-//     setState(() {
-//       compass += 1;
-//     });
-//   }
-
-//   void _decreaseCompass() {
-//     setState(() {
-//       compass -= 1;
-//     });
-//   }
-
-//   void _increaseBatidas() {
-//     setState(() {
-//       batidas += 1;
-//     });
-//   }
-
-//   void _decreaseBatidas() {
-//     setState(() {
-//       batidas -= 1;
-//     });
-//   }
-// }
