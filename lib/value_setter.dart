@@ -1,40 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class ValueSetter extends StatefulWidget {
-  final int value;
-  final ValueChanged<int> onValueChanged;
+class ValueSetter<T extends ChangeNotifier> extends StatelessWidget {
+  final int Function(T) getValue;
+  final void Function(T, int, bool) updateValue;
 
-  ValueSetter({required this.value, required this.onValueChanged});
-
-  @override
-  _ValueSetterState createState() => _ValueSetterState();
-}
-
-class _ValueSetterState extends State<ValueSetter> {
-  late int _currentValue;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentValue = widget.value;
-  }
+  ValueSetter({
+    required this.getValue,
+    required this.updateValue,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final model = Provider.of<T>(context);
+    int currentValue = getValue(model);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
-          onPressed: () => setState(() {
-            _currentValue -= 1;
-            widget.onValueChanged(_currentValue);
-          }),
+          onPressed: () {
+            updateValue(model, -1, true); // Diminui 1 unidade
+          },
           icon: Icon(Icons.remove),
           iconSize: 28,
         ),
         Container(
           child: Text(
-            '$_currentValue',
+            '$currentValue',
             style: TextStyle(
               color: Colors.black,
               fontSize: 32,
@@ -44,10 +37,9 @@ class _ValueSetterState extends State<ValueSetter> {
           ),
         ),
         IconButton(
-          onPressed: () => setState(() {
-            _currentValue += 1;
-            widget.onValueChanged(_currentValue);
-          }),
+          onPressed: () {
+            updateValue(model, 1, true); // Aumenta 1 unidade
+          },
           icon: Icon(Icons.add),
           iconSize: 25,
         ),

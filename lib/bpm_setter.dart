@@ -1,39 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'bpm_model.dart';
 
-import 'metronome_instance.dart';
-
-class BpmSetter extends StatefulWidget {
-  final int bpm;
-  final ValueChanged<int> onBpmChanged;
-
-  BpmSetter({required this.bpm, required this.onBpmChanged});
-
-  @override
-  _BpmSetterState createState() => _BpmSetterState();
-}
-
-class _BpmSetterState extends State<BpmSetter> {
-  late int _bpm;
-
-  final GlobalKey<MetronomeInstanceState> _metronomeKey =
-      GlobalKey<MetronomeInstanceState>();
-  bool _isPlaying = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _bpm = widget.bpm;
-  }
-
-  void _updateBpm(int value) {
-    setState(() {
-      _bpm += value;
-      widget.onBpmChanged(_bpm);
-    });
-  }
-
+class BpmSetter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final bpmModel = Provider.of<BpmModel>(context);
+
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -42,16 +15,14 @@ class _BpmSetterState extends State<BpmSetter> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _isPlaying
-                  ? Icon(null)
-                  : IconButton(
-                      onPressed: () => _updateBpm(-1),
-                      icon: Icon(Icons.remove),
-                      iconSize: 48,
-                    ),
+              IconButton(
+                onPressed: () => bpmModel.updateBpm(-1, true),
+                icon: Icon(Icons.remove),
+                iconSize: 48,
+              ),
               Container(
                 child: Text(
-                  '$_bpm',
+                  '${bpmModel.bpm}',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 58,
@@ -61,7 +32,7 @@ class _BpmSetterState extends State<BpmSetter> {
                 ),
               ),
               IconButton(
-                onPressed: () => _updateBpm(1),
+                onPressed: () => bpmModel.updateBpm(1, true),
                 icon: Icon(Icons.add),
                 iconSize: 48,
               ),
@@ -72,7 +43,7 @@ class _BpmSetterState extends State<BpmSetter> {
           top: 35,
           right: 45,
           child: GestureDetector(
-            onTap: () => _updateBpm(10),
+            onTap: () => bpmModel.updateBpm(10, true),
             child: Container(
               width: 55,
               height: 45,
@@ -98,7 +69,7 @@ class _BpmSetterState extends State<BpmSetter> {
           top: 35,
           left: 45,
           child: GestureDetector(
-            onTap: () => _updateBpm(-10),
+            onTap: () => bpmModel.updateBpm(-10, true),
             child: Container(
               width: 55,
               height: 45,
@@ -124,7 +95,7 @@ class _BpmSetterState extends State<BpmSetter> {
           bottom: 35,
           right: 50,
           child: GestureDetector(
-            onTap: () => _updateBpm(5),
+            onTap: () => bpmModel.updateBpm(5, true),
             child: Container(
               width: 55,
               height: 45,
@@ -150,7 +121,7 @@ class _BpmSetterState extends State<BpmSetter> {
           bottom: 35,
           left: 45,
           child: GestureDetector(
-            onTap: () => _updateBpm(-5),
+            onTap: () => bpmModel.updateBpm(-5, true),
             child: Container(
               width: 55,
               height: 45,
@@ -175,7 +146,7 @@ class _BpmSetterState extends State<BpmSetter> {
         Positioned(
           bottom: 45,
           child: Text('BPM', style: TextStyle(color: Colors.black)),
-        )
+        ),
       ],
     );
   }

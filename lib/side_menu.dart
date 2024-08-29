@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/home_page.dart';
+import 'package:metronomo_definitivo/samples.dart';
+import 'package:metronomo_definitivo/teste.dart';
 
 class NavigationDrawer extends StatelessWidget {
   const NavigationDrawer({Key? key}) : super(key: key);
@@ -9,20 +11,8 @@ class NavigationDrawer extends StatelessWidget {
     return Drawer(
       child: ListView(
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Color(0xFF095169),
-            ),
-            child: Text(
-              'Vibrasom',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-              ),
-            ),
-          ),
           ListTile(
-            title: const Text('Metronome'),
+            title: const Text('Página inicial'),
             onTap: () {
               Navigator.push(
                 context,
@@ -31,11 +21,32 @@ class NavigationDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            title: const Text('Settings'),
+            title: const Text('Samples'),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    content: const Samples(),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('Fechar'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+          ListTile(
+            title: const Text('Configurações'),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => HomePage()),
+                MaterialPageRoute(builder: (context) => MyPage()),
               );
             },
           ),
