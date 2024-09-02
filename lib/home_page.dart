@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:metronomo_definitivo/color_model.dart';
+import 'package:provider/provider.dart';
+import 'isPlaying_model.dart';
 import 'metronome_instance.dart';
 import 'side_menu.dart' as side_menu;
 
@@ -9,12 +12,19 @@ class MetronomeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'VIBRASOM',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      // Use MultiProvider for multiple models
+      providers: [
+        ChangeNotifierProvider(create: (context) => ColorModel()),
+        ChangeNotifierProvider(create: (context) => IsPlayingModel()),
+      ],
+      child: MaterialApp(
+        title: 'VIBRASOM',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const HomePage(),
       ),
-      home: const HomePage(),
     );
   }
 }
@@ -27,76 +37,59 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final GlobalKey<MetronomeInstanceState> _metronomeKey =
-      GlobalKey<MetronomeInstanceState>();
-  bool _isPlaying = false;
-  Color _backgroundColor = const Color(0xFF095169);
-
   @override
   void initState() {
     super.initState();
   }
 
-  void _updateBackgroundColor() {
-    setState(() {
-      _backgroundColor = _metronomeKey.currentState?.backgroundColor ??
-          const Color(0xFF095169);
-    });
-  }
-
-  void _updateIsPlaying() {
-    setState(() {
-      _isPlaying = _metronomeKey.currentState?.isPlaying ?? false;
-      _updateBackgroundColor();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Stack(alignment: Alignment.center, children: [
-      Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        color: _backgroundColor,
-      ),
-      AnimatedContainer(
-        curve: Curves.easeInQuart,
-        duration: const Duration(milliseconds: 350),
-        width: _isPlaying
-            ? MediaQuery.of(context).size.width * 0.85
-            : MediaQuery.of(context).size.width,
-        height: _isPlaying
-            ? MediaQuery.of(context).size.height * 0.85
-            : MediaQuery.of(context).size.height,
-        child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: const Color(0xFF095169),
-            iconTheme: _isPlaying
-                ? IconThemeData(color: Colors.transparent)
-                : IconThemeData(color: Colors.white),
-            centerTitle: true,
-            title: const Text(
-              'Vibrasom',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 32.0,
-                fontFamily: 'BellotaText',
-                fontWeight: FontWeight.bold,
+    final isPlayingModel = Provider.of<IsPlayingModel>(context);
+    final colorModel = Provider.of<ColorModel>(context);
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          color: colorModel.backgroundColor,
+        ),
+        AnimatedContainer(
+          curve: Curves.easeInQuart,
+          duration: const Duration(milliseconds: 350),
+          width: isPlayingModel.isPlaying
+              ? MediaQuery.of(context).size.width * 0.85
+              : MediaQuery.of(context).size.width,
+          height: isPlayingModel.isPlaying
+              ? MediaQuery.of(context).size.height * 0.85
+              : MediaQuery.of(context).size.height,
+          child: Scaffold(
+            appBar: AppBar(
+              backgroundColor: const Color(0xFF095169),
+              iconTheme: IconThemeData(
+                color: isPlayingModel.isPlaying
+                    ? Colors.transparent
+                    : Colors.white,
+              ),
+              centerTitle: true,
+              title: const Text(
+                'Vibrasom',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 32.0,
+                  fontFamily: 'BellotaText',
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          drawer: const side_menu.NavigationDrawer(),
-          body: Center(
-            child: MetronomeInstance(
-              key: _metronomeKey,
-              onStateChanged: () {
-                _updateIsPlaying();
-                _updateBackgroundColor();
-              },
+            drawer: const side_menu.NavigationDrawer(),
+            body: Center(
+              child: MetronomeInstance(),
             ),
           ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }

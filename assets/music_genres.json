@@ -1,0 +1,22 @@
+{
+    "genres": [
+        {
+            "name": "Rock",
+            "bpm": 120,
+            "compasso": 4,
+            "batidas":4
+        },
+        {
+            "name": "Jazz",
+            "bpm": 140,
+            "compasso": 4,
+            "batidas":4
+        },
+        {
+            "name": "Waltz",
+            "bpm": 60,
+            "compasso": 3,
+            "batidas":4
+        }
+    ]
+}
