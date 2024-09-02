@@ -37,11 +37,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final GlobalKey<MetronomeInstanceState> _metronomeKey =
-      GlobalKey<MetronomeInstanceState>();
-
-  Color _backgroundColor = const Color(0xFF095169);
-
   @override
   void initState() {
     super.initState();
@@ -50,7 +45,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final isPlayingModel = Provider.of<IsPlayingModel>(context);
-    final colorModel = Provider.of<ColorModel>(context, listen: false);
+    final colorModel = Provider.of<ColorModel>(context);
 
     return Stack(
       alignment: Alignment.center,
@@ -90,10 +85,7 @@ class _HomePageState extends State<HomePage> {
             ),
             drawer: const side_menu.NavigationDrawer(),
             body: Center(
-              child: MetronomeInstance(
-                key: _metronomeKey,
-                onStateChanged: () {},
-              ),
+              child: MetronomeInstance(),
             ),
           ),
         ),

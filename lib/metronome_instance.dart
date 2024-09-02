@@ -28,7 +28,6 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   late Metronome _metronome;
   bool _isTorchOn = false;
   bool _isVibrating = true;
-  Color _backgroundColor = Color(0xFF095169);
   Timer? _clickTimer;
   int _currentTick = 0;
   int _currentCycle = 0;
@@ -60,14 +59,6 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   set isVibrating(bool value) {
     setState(() {
       _isVibrating = value;
-    });
-  }
-
-  Color get backgroundColor => _backgroundColor;
-  set backgroundColor(Color value) {
-    setState(() {
-      _backgroundColor = value;
-      widget.onStateChanged?.call(); // Notificar sobre a mudança de cor
     });
   }
 
@@ -106,6 +97,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
         Provider.of<CompassoModel>(context, listen: false).compasso;
     final bpm = Provider.of<BpmModel>(context, listen: false).bpm;
     final clicksPerBeat = Provider.of<BeatsModel>(context, listen: false).beats;
+    final colorModel = Provider.of<ColorModel>(context, listen: false);
 
     int interval = (60000 / (bpm * clicksPerBeat)).round();
     int vibrationDuration = interval ~/ 2;
@@ -114,13 +106,13 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
       _currentCycle++;
       _currentBeat = 1;
       vibrationDuration = (interval * 0.8).round();
-      _changeToBlack();
+      colorModel.changeToBlack();
       _torchOn(_isTorchOn, vibrationDuration);
       _playSound(_specialClickPlayers, _specialClickDuration, 'tick.wav');
     } else {
       _torchOn(_isTorchOn, vibrationDuration);
       _playSound(_clickPlayers, _clickDuration, 'clique.wav');
-      _changeToRandomColor();
+      colorModel.changeToRandomColor();
     }
 
     _vibrateOn(_isVibrating, vibrationDuration);
@@ -128,12 +120,6 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     if (_currentCycle > beatsPerMeasure) {
       _currentCycle = 1;
     }
-  }
-
-  void _changeToBlack() {
-    setState(() {
-      _backgroundColor = Colors.black;
-    });
   }
 
   void _vibrateOn(bool isVibratingOn, int vibrationDuration) {
@@ -149,26 +135,6 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
         _torchController.toggle();
       });
     }
-  }
-
-  void _changeToRandomColor() {
-    final colorModel = Provider.of<ColorModel>(context, listen: false);
-    setState(() {
-      if (_backgroundColor == Colors.black) {
-        _backgroundColor = Colors.green;
-        print('deveria atualizar para verde');
-        colorModel.backgroundColor = Colors.green;
-      } else if (_backgroundColor == Colors.green) {
-        _backgroundColor = Colors.blue;
-
-        print('deveria atualizar para azul');
-        colorModel.backgroundColor = Colors.blue;
-      } else {
-        _backgroundColor = Colors.green;
-        print('deveria atualizar para verde');
-        colorModel.backgroundColor = Colors.green;
-      }
-    });
   }
 
   void _toggleIsVibrateOn() {
@@ -216,6 +182,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   Widget build(BuildContext context) {
     final isPlayingModel = Provider.of<IsPlayingModel>(context);
     final isPlaying = isPlayingModel.isPlaying;
+    final colorModel = Provider.of<ColorModel>(context);
 
     return SingleChildScrollView(
       child: Column(
@@ -226,7 +193,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
             height: 240,
             width: 240,
             decoration: BoxDecoration(
-              color: _backgroundColor,
+              color: colorModel.backgroundColor,
               shape: BoxShape.circle,
             ),
             child: Center(
