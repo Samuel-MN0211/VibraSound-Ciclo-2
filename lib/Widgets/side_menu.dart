@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:metronomo_definitivo/home_page.dart';
-import 'package:metronomo_definitivo/samples.dart';
-import 'package:metronomo_definitivo/teste.dart';
+import 'package:metronomo_definitivo/Pages/home_page.dart';
+import 'package:metronomo_definitivo/Widgets/samples.dart';
+import 'package:metronomo_definitivo/Pages/teste.dart';
 
 class NavigationDrawer extends StatelessWidget {
   const NavigationDrawer({Key? key}) : super(key: key);

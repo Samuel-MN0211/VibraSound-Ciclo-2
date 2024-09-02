@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'metronome_instance.dart';
+import '../Widgets/metronome_instance.dart';
 
 class MultipleMetronomePage extends StatefulWidget {
   const MultipleMetronomePage({super.key});

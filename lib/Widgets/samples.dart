@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:metronomo_definitivo/beats_model.dart';
-import 'package:metronomo_definitivo/bpm_model.dart';
-import 'package:metronomo_definitivo/compasso_model.dart';
+import 'package:metronomo_definitivo/Models/beats_model.dart';
+import 'package:metronomo_definitivo/Models/bpm_model.dart';
+import 'package:metronomo_definitivo/Models/compasso_model.dart';
 import 'package:provider/provider.dart';
 import 'metronome_instance.dart';
 import 'dart:convert';
@@ -52,11 +52,6 @@ class _SamplesState extends State<Samples> {
               bpmModel.updateBpm(genre['bpm'], false);
               beatsModel.updateBeats(genre['batidas'], false);
               compassoModel.updateCompasso(genre['compasso'], false);
-              print(
-                  '---------------------------------------------------------------------------------------------------------');
-
-              print(
-                  '---------------------------------------------------------------------------------------------------------');
               Navigator.pop(context);
               Fluttertoast.showToast(
                   msg: "Genero selecionado: ${genre['name']}",

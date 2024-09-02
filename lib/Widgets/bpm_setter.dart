@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'bpm_model.dart';
+import '../Models/bpm_model.dart';
 
 class BpmSetter extends StatelessWidget {
   @override
