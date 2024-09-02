@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:metronomo_definitivo/color_model.dart';
+import 'package:metronomo_definitivo/Models/color_model.dart';
 import 'package:provider/provider.dart';
-import 'isPlaying_model.dart';
-import 'metronome_instance.dart';
-import 'side_menu.dart' as side_menu;
+import '../Models/is_playing_model.dart';
+import '../Widgets/metronome_instance.dart';
+import '../Widgets/side_menu.dart' as side_menu;
 
 void main() => runApp(const MetronomeApp());
 

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:metronomo_definitivo/isPlaying_model.dart';
+import 'package:metronomo_definitivo/Models/is_playing_model.dart';
 import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:vibration/vibration.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'beats_model.dart';
-import 'bpm_model.dart';
+import '../Models/beats_model.dart';
+import '../Models/bpm_model.dart';
 import 'bpm_setter.dart';
-import 'color_model.dart';
-import 'compasso_model.dart';
-import 'metronome.dart';
+import '../Models/color_model.dart';
+import '../Models/compasso_model.dart';
+import '../Models/metronome_model.dart';
 import 'value_setter.dart' as custom;
 import 'dart:collection'; // Import necessário para a Queue
 

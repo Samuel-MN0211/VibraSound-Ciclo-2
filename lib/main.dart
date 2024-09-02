@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:metronomo_definitivo/beats_model.dart';
-import 'package:metronomo_definitivo/bpm_model.dart';
+import 'package:metronomo_definitivo/Models/beats_model.dart';
+import 'package:metronomo_definitivo/Models/bpm_model.dart';
 import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
-import 'color_model.dart';
-import 'compasso_model.dart';
-import 'home_page.dart';
-import 'isPlaying_model.dart';
-import 'multiple_metronome_page.dart';
-import 'samples.dart';
+import 'Models/color_model.dart';
+import 'Models/compasso_model.dart';
+import 'Pages/home_page.dart';
+import 'Models/is_playing_model.dart';
+import 'Pages/multiple_metronome_page.dart';
+import 'Widgets/samples.dart';
 
 void main() {
   TorchController().initialize();
