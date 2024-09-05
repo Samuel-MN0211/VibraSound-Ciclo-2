@@ -3,7 +3,6 @@ import 'package:metronomo_definitivo/Models/beats_model.dart';
 import 'package:metronomo_definitivo/Models/bpm_model.dart';
 import 'package:metronomo_definitivo/Models/compasso_model.dart';
 import 'package:provider/provider.dart';
-import 'metronome_instance.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:fluttertoast/fluttertoast.dart';
@@ -40,28 +39,36 @@ class _SamplesState extends State<Samples> {
     final beatsModel = Provider.of<BeatsModel>(context, listen: false);
     final compassoModel = Provider.of<CompassoModel>(context, listen: false);
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: ListView.builder(
         itemCount: genres.length,
         itemBuilder: (context, index) {
           final genre = genres[index];
-          return ListTile(
-            title: Text(genre['name']),
-            subtitle: Text(
-                'BPM: ${genre['bpm']}, Compasso: ${genre['compasso']}, Batidas: ${genre['batidas']}'),
-            onTap: () {
-              bpmModel.updateBpm(genre['bpm'], false);
-              beatsModel.updateBeats(genre['batidas'], false);
-              compassoModel.updateCompasso(genre['compasso'], false);
-              Navigator.pop(context);
-              Fluttertoast.showToast(
-                  msg: "Genero selecionado: ${genre['name']}",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.CENTER,
-                  timeInSecForIosWeb: 1,
-                  backgroundColor: Colors.green,
-                  textColor: Colors.white,
-                  fontSize: 16.0);
-            },
+          return Card(
+            color: Color(0xFF095169),
+            child: ListTile(
+              title: Text(
+                genre['name'],
+                style: TextStyle(color: Colors.white),
+              ),
+              subtitle: Text(
+                  'BPM: ${genre['bpm']}, Compasso: ${genre['compasso']}, Batidas: ${genre['batidas']}',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () {
+                bpmModel.updateBpm(genre['bpm'], false);
+                beatsModel.updateBeats(genre['batidas'], false);
+                compassoModel.updateCompasso(genre['compasso'], false);
+                Navigator.pop(context);
+                Fluttertoast.showToast(
+                    msg: "Genero selecionado: ${genre['name']}",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              },
+            ),
           );
         },
       ),

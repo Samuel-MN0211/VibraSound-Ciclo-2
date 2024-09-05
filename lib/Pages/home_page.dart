@@ -13,7 +13,6 @@ class MetronomeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      // Use MultiProvider for multiple models
       providers: [
         ChangeNotifierProvider(create: (context) => ColorModel()),
         ChangeNotifierProvider(create: (context) => IsPlayingModel()),
@@ -84,7 +83,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             drawer: const side_menu.NavigationDrawer(),
-            body: Center(
+            body: const Center(
               child: MetronomeInstance(),
             ),
           ),

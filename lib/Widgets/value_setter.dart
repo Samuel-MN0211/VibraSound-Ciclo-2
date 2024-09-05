@@ -22,13 +22,13 @@ class ValueSetter<T extends ChangeNotifier> extends StatelessWidget {
           onPressed: () {
             updateValue(model, -1, true); // Diminui 1 unidade
           },
-          icon: Icon(Icons.remove),
+          icon: const Icon(Icons.remove),
           iconSize: 28,
         ),
         Container(
           child: Text(
             '$currentValue',
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black,
               fontSize: 32,
               fontWeight: FontWeight.bold,
@@ -40,7 +40,7 @@ class ValueSetter<T extends ChangeNotifier> extends StatelessWidget {
           onPressed: () {
             updateValue(model, 1, true); // Aumenta 1 unidade
           },
-          icon: Icon(Icons.add),
+          icon: const Icon(Icons.add),
           iconSize: 25,
         ),
       ],

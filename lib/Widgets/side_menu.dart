@@ -16,7 +16,7 @@ class NavigationDrawer extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => HomePage()),
+                MaterialPageRoute(builder: (context) => const HomePage()),
               );
             },
           ),
@@ -27,15 +27,25 @@ class NavigationDrawer extends StatelessWidget {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    content: const Samples(),
+                    content: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Samples(),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 2.0),
                     actions: [
                       TextButton(
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
-                        child: const Text('Fechar'),
+                        child: const Text(
+                          'Fechar',
+                          style: TextStyle(color: Colors.black),
+                        ),
                       ),
                     ],
+                    actionsPadding: const EdgeInsets.symmetric(
+                        vertical: 1.0, horizontal: 16.0),
                   );
                 },
               );

@@ -4,19 +4,61 @@
             "name": "Rock",
             "bpm": 120,
             "compasso": 4,
-            "batidas":4
+            "batidas": 4
         },
         {
             "name": "Jazz",
             "bpm": 140,
             "compasso": 4,
-            "batidas":4
+            "batidas": 4
         },
         {
             "name": "Waltz",
             "bpm": 60,
             "compasso": 3,
-            "batidas":4
+            "batidas": 4
+        },
+        {
+            "name": "Blues",
+            "bpm": 90,
+            "compasso": 4,
+            "batidas": 4
+        },
+        {
+            "name": "Hip Hop",
+            "bpm": 85,
+            "compasso": 4,
+            "batidas": 4
+        },
+        {
+            "name": "Classica",
+            "bpm": 70,
+            "compasso": 4,
+            "batidas": 4
+        },
+        {
+            "name": "Reggae",
+            "bpm": 80,
+            "compasso": 4,
+            "batidas": 4
+        },
+        {
+            "name": "Samba",
+            "bpm": 100,
+            "compasso": 2,
+            "batidas": 4
+        },
+        {
+            "name": "Bossa Nova",
+            "bpm": 130,
+            "compasso": 4,
+            "batidas": 4
+        },
+        {
+            "name": "Electronic",
+            "bpm": 128,
+            "compasso": 4,
+            "batidas": 4
         }
     ]
 }

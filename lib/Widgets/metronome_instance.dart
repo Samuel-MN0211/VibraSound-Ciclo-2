@@ -3,7 +3,6 @@ import 'package:metronomo_definitivo/Models/is_playing_model.dart';
 import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
 import 'dart:async';
-import 'dart:math';
 import 'package:vibration/vibration.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../Models/beats_model.dart';
@@ -199,7 +198,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
             child: Center(
               child: Text(
                 '$_currentBeat',
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
@@ -208,15 +207,15 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
               ),
             ),
           ),
-          Padding(padding: EdgeInsets.all(12)),
+          const Padding(padding: EdgeInsets.all(12)),
           isPlaying
-              ? SizedBox.shrink()
+              ? const SizedBox.shrink()
               : Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Column(
                       children: [
-                        Text(
+                        const Text(
                           'Compasso',
                           style: TextStyle(fontSize: 22),
                         ),
@@ -229,7 +228,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
                     ),
                     Column(
                       children: [
-                        Text('Batidas', style: TextStyle(fontSize: 22)),
+                        const Text('Batidas', style: TextStyle(fontSize: 22)),
                         custom.ValueSetter<BeatsModel>(
                           getValue: (model) => model.beats,
                           updateValue: (model, value, isIncrement) =>
@@ -246,7 +245,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
                 child: IconButton(
                   onPressed: _toggleIsVibrateOn,
                   icon: isPlaying
-                      ? Icon(null)
+                      ? const Icon(null)
                       : Icon(
                           Icons.vibration,
                           color: _isVibrating ? Colors.black : Colors.grey,
@@ -274,7 +273,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
                 child: IconButton(
                   onPressed: _toggleIsTorchOn,
                   icon: isPlaying
-                      ? Icon(null)
+                      ? const Icon(null)
                       : Icon(
                           Icons.flashlight_on,
                           color: _isTorchOn ? Colors.black : Colors.grey,

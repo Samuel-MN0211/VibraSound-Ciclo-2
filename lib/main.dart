@@ -8,7 +8,6 @@ import 'Models/compasso_model.dart';
 import 'Pages/home_page.dart';
 import 'Models/is_playing_model.dart';
 import 'Pages/multiple_metronome_page.dart';
-import 'Widgets/samples.dart';
 
 void main() {
   TorchController().initialize();
