@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/beats_model.dart';
 import 'package:metronomo_definitivo/Models/bpm_model.dart';
 import 'package:metronomo_definitivo/Models/compasso_model.dart';
+import 'package:metronomo_definitivo/Models/genre_selected_model.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
@@ -38,6 +39,9 @@ class _SamplesState extends State<Samples> {
     final bpmModel = Provider.of<BpmModel>(context, listen: false);
     final beatsModel = Provider.of<BeatsModel>(context, listen: false);
     final compassoModel = Provider.of<CompassoModel>(context, listen: false);
+    final GenreSelectedModel genreSelectedModel =
+        Provider.of<GenreSelectedModel>(context, listen: false);
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: ListView.builder(
@@ -49,7 +53,11 @@ class _SamplesState extends State<Samples> {
             child: ListTile(
               title: Text(
                 genre['name'],
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
               ),
               subtitle: Text(
                   'BPM: ${genre['bpm']}, Compasso: ${genre['compasso']}, Batidas: ${genre['batidas']}',
@@ -58,6 +66,7 @@ class _SamplesState extends State<Samples> {
                 bpmModel.updateBpm(genre['bpm'], false);
                 beatsModel.updateBeats(genre['batidas'], false);
                 compassoModel.updateCompasso(genre['compasso'], false);
+                genreSelectedModel.genreSelected = genre['name'];
                 Navigator.pop(context);
                 Fluttertoast.showToast(
                     msg: "Genero selecionado: ${genre['name']}",

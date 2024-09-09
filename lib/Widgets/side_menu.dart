@@ -12,6 +12,7 @@ class NavigationDrawer extends StatelessWidget {
       child: ListView(
         children: [
           ListTile(
+            leading: const Icon(Icons.home),
             title: const Text('Página inicial'),
             onTap: () {
               Navigator.push(
@@ -21,6 +22,7 @@ class NavigationDrawer extends StatelessWidget {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.music_note),
             title: const Text('Samples'),
             onTap: () {
               showDialog(
@@ -51,15 +53,15 @@ class NavigationDrawer extends StatelessWidget {
               );
             },
           ),
-          ListTile(
-            title: const Text('Configurações'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MyPage()),
-              );
-            },
-          ),
+          // ListTile(
+          //   title: const Text('Configurações'),
+          //   onTap: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(builder: (context) => MyPage()),
+          //     );
+          //   },
+          // ),
         ],
       ),
     );

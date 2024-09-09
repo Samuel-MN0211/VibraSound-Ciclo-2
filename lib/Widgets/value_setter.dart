@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:metronomo_definitivo/Models/genre_selected_model.dart';
 import 'package:provider/provider.dart';
 
 class ValueSetter<T extends ChangeNotifier> extends StatelessWidget {
@@ -13,6 +14,8 @@ class ValueSetter<T extends ChangeNotifier> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final model = Provider.of<T>(context);
+    final GenreSelectedModel genreSelectedModel =
+        Provider.of<GenreSelectedModel>(context);
     int currentValue = getValue(model);
 
     return Row(
@@ -20,7 +23,8 @@ class ValueSetter<T extends ChangeNotifier> extends StatelessWidget {
       children: [
         IconButton(
           onPressed: () {
-            updateValue(model, -1, true); // Diminui 1 unidade
+            updateValue(model, -1, true);
+            genreSelectedModel.genreSelected = ''; // Diminui 1 unidade
           },
           icon: const Icon(Icons.remove),
           iconSize: 28,
@@ -38,7 +42,8 @@ class ValueSetter<T extends ChangeNotifier> extends StatelessWidget {
         ),
         IconButton(
           onPressed: () {
-            updateValue(model, 1, true); // Aumenta 1 unidade
+            updateValue(model, 1, true);
+            genreSelectedModel.genreSelected = ''; // Aumenta 1 unidade
           },
           icon: const Icon(Icons.add),
           iconSize: 25,

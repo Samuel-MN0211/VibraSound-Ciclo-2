@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
 import 'Models/color_model.dart';
 import 'Models/compasso_model.dart';
+import 'Models/genre_selected_model.dart';
 import 'Pages/home_page.dart';
 import 'Models/is_playing_model.dart';
 import 'Pages/multiple_metronome_page.dart';
@@ -25,8 +26,9 @@ class MetronomeApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => CompassoModel()),
         ChangeNotifierProvider(create: (context) => BeatsModel()),
         ChangeNotifierProvider(create: (context) => IsPlayingModel()),
-        ChangeNotifierProvider(create: (context) => ColorModel())
-      ], // Use more descriptive variable name
+        ChangeNotifierProvider(create: (context) => ColorModel()),
+        ChangeNotifierProvider(create: (context) => GenreSelectedModel()),
+      ],
       child: Consumer<BpmModel>(
         builder: (context, samplesController, child) {
           return MaterialApp(

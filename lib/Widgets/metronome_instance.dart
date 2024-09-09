@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:metronomo_definitivo/Models/genre_selected_model.dart';
 import 'package:metronomo_definitivo/Models/is_playing_model.dart';
 import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
@@ -182,6 +183,8 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     final isPlayingModel = Provider.of<IsPlayingModel>(context);
     final isPlaying = isPlayingModel.isPlaying;
     final colorModel = Provider.of<ColorModel>(context);
+    final GenreSelectedModel genreSelectedModel =
+        Provider.of<GenreSelectedModel>(context);
 
     return SingleChildScrollView(
       child: Column(
@@ -206,6 +209,15 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
                 ),
               ),
             ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(right: 30.0),
+                child: Text(genreSelectedModel.genreSelected),
+              ),
+            ],
           ),
           const Padding(padding: EdgeInsets.all(12)),
           isPlaying

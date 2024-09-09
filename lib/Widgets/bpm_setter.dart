@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:metronomo_definitivo/Models/genre_selected_model.dart';
 import 'package:provider/provider.dart';
 import '../Models/bpm_model.dart';
 
@@ -6,6 +7,8 @@ class BpmSetter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bpmModel = Provider.of<BpmModel>(context);
+    final GenreSelectedModel genreSelectedModel =
+        Provider.of<GenreSelectedModel>(context);
 
     return Stack(
       alignment: Alignment.center,
@@ -16,7 +19,10 @@ class BpmSetter extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                onPressed: () => bpmModel.updateBpm(-1, true),
+                onPressed: () {
+                  bpmModel.updateBpm(-1, true);
+                  genreSelectedModel.genreSelected = '';
+                },
                 icon: Icon(Icons.remove),
                 iconSize: 48,
               ),
@@ -32,7 +38,10 @@ class BpmSetter extends StatelessWidget {
                 ),
               ),
               IconButton(
-                onPressed: () => bpmModel.updateBpm(1, true),
+                onPressed: () {
+                  bpmModel.updateBpm(1, true);
+                  genreSelectedModel.genreSelected = '';
+                },
                 icon: Icon(Icons.add),
                 iconSize: 48,
               ),
@@ -43,7 +52,10 @@ class BpmSetter extends StatelessWidget {
           top: 35,
           right: 45,
           child: GestureDetector(
-            onTap: () => bpmModel.updateBpm(10, true),
+            onTap: () {
+              bpmModel.updateBpm(10, true);
+              genreSelectedModel.genreSelected = '';
+            },
             child: Container(
               width: 55,
               height: 45,
@@ -69,7 +81,10 @@ class BpmSetter extends StatelessWidget {
           top: 35,
           left: 45,
           child: GestureDetector(
-            onTap: () => bpmModel.updateBpm(-10, true),
+            onTap: () {
+              bpmModel.updateBpm(-10, true);
+              genreSelectedModel.genreSelected = '';
+            },
             child: Container(
               width: 55,
               height: 45,
@@ -95,7 +110,10 @@ class BpmSetter extends StatelessWidget {
           bottom: 35,
           right: 50,
           child: GestureDetector(
-            onTap: () => bpmModel.updateBpm(5, true),
+            onTap: () {
+              bpmModel.updateBpm(5, true);
+              genreSelectedModel.genreSelected = '';
+            },
             child: Container(
               width: 55,
               height: 45,
@@ -121,7 +139,10 @@ class BpmSetter extends StatelessWidget {
           bottom: 35,
           left: 45,
           child: GestureDetector(
-            onTap: () => bpmModel.updateBpm(-5, true),
+            onTap: () {
+              bpmModel.updateBpm(-5, true);
+              genreSelectedModel.genreSelected = '';
+            },
             child: Container(
               width: 55,
               height: 45,
