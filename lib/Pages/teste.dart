@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../Models/bpm_model.dart';
+import 'package:metronomo_definitivo/Widgets/bpm_scheduler.dart';
 
 class MyPage extends StatefulWidget {
   @override
@@ -11,14 +9,8 @@ class MyPage extends StatefulWidget {
 class _MyPageState extends State<MyPage> {
   @override
   Widget build(BuildContext context) {
-    final bpmModel = Provider.of<BpmModel>(context, listen: false);
-    return Scaffold(
-      body: Center(
-        child: Text(
-          'Valor do bpm atualizado${bpmModel.bpm}',
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
+    return const Scaffold(
+      body: BpmScheduler(),
     );
   }
 }

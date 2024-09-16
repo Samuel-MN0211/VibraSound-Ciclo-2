@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Pages/home_page.dart';
+import 'package:metronomo_definitivo/Widgets/bpm_scheduler.dart';
 import 'package:metronomo_definitivo/Widgets/samples.dart';
-import 'package:metronomo_definitivo/Pages/teste.dart';
 
 class NavigationDrawer extends StatelessWidget {
   const NavigationDrawer({Key? key}) : super(key: key);
@@ -53,15 +53,29 @@ class NavigationDrawer extends StatelessWidget {
               );
             },
           ),
-          // ListTile(
-          //   title: const Text('Configurações'),
-          //   onTap: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(builder: (context) => MyPage()),
-          //     );
-          //   },
-          // ),
+          ListTile(
+            title: const Text('Configurações'),
+            onTap: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      content: BpmScheduler(),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text(
+                            'Fechar',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ),
+                      ],
+                    );
+                  });
+            },
+          ),
         ],
       ),
     );

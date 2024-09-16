@@ -8,6 +8,7 @@ import 'package:vibration/vibration.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../Models/beats_model.dart';
 import '../Models/bpm_model.dart';
+import '../Models/bpm_scheduler_model.dart';
 import 'bpm_setter.dart';
 import '../Models/color_model.dart';
 import '../Models/compasso_model.dart';
@@ -95,12 +96,31 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
 
     final beatsPerMeasure =
         Provider.of<CompassoModel>(context, listen: false).compasso;
-    final bpm = Provider.of<BpmModel>(context, listen: false).bpm;
     final clicksPerBeat = Provider.of<BeatsModel>(context, listen: false).beats;
     final colorModel = Provider.of<ColorModel>(context, listen: false);
+    final bpmModel = Provider.of<BpmModel>(context, listen: false);
+    final bpmScheduler = Provider.of<BpmSchedulerModel>(context, listen: false);
 
-    int interval = (60000 / (bpm * clicksPerBeat)).round();
+    int interval = (60000 / (bpmModel.bpm * clicksPerBeat)).round();
     int vibrationDuration = interval ~/ 2;
+
+    if (bpmScheduler.isActivated) {
+      final now = DateTime.now();
+      if (now.difference(bpmScheduler.lastChange).inSeconds >=
+          bpmScheduler.secondsToMakeChange) {
+        bpmModel.updateBpm(bpmScheduler.valueToChange, true);
+        bpmScheduler.lastChange = now;
+
+        //reinicia o metronome com os novos valores
+        _metronome.stop();
+        _metronome = Metronome(bpm: bpmModel.bpm, clicksPerBeat: clicksPerBeat);
+        _metronome.onTick(_onTick);
+        _metronome.start();
+
+        interval = (60000 / (bpmModel.bpm * clicksPerBeat)).round();
+        vibrationDuration = interval ~/ 2;
+      }
+    }
 
     if (_currentTick % clicksPerBeat == 1) {
       _currentCycle++;
@@ -150,23 +170,26 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   }
 
   void _togglePlayPause() {
-    // Obtenha a instância do IsPlayingModel
     final isPlayingModel = Provider.of<IsPlayingModel>(context, listen: false);
-
     setState(() {
       if (isPlayingModel.isPlaying) {
         _metronome.stop();
         _currentTick = 0;
         _currentCycle = 0;
       } else {
+        final bpmScheduler =
+            Provider.of<BpmSchedulerModel>(context, listen: false);
         final bpm = Provider.of<BpmModel>(context, listen: false).bpm;
         final clicksPerBeat =
             Provider.of<BeatsModel>(context, listen: false).beats;
+
+        if (bpmScheduler.isActivated) {
+          bpmScheduler.lastChange = DateTime.now();
+        }
         _metronome = Metronome(bpm: bpm, clicksPerBeat: clicksPerBeat);
         _metronome.onTick(_onTick);
         _metronome.start();
       }
-      // Altere o estado de isPlayingModel
       isPlayingModel.isPlaying = !isPlayingModel.isPlaying;
     });
   }
@@ -266,7 +289,9 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
                 ),
               ),
               IconButton(
-                onPressed: _togglePlayPause,
+                onPressed: () {
+                  _togglePlayPause();
+                },
                 icon: Container(
                   height: 75,
                   width: 75,
