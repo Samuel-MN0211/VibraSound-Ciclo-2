@@ -54,7 +54,8 @@ class NavigationDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            title: const Text('Configurações'),
+            leading: const Icon(Icons.date_range),
+            title: const Text('Agendador'),
             onTap: () {
               showDialog(
                   context: context,
