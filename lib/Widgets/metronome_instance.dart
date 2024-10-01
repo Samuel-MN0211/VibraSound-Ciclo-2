@@ -47,22 +47,6 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     _preloadSounds();
   }
 
-  // Getters and Setters
-
-  bool get isTorchOn => _isTorchOn;
-  set isTorchOn(bool value) {
-    setState(() {
-      _isTorchOn = value;
-    });
-  }
-
-  bool get isVibrating => _isVibrating;
-  set isVibrating(bool value) {
-    setState(() {
-      _isVibrating = value;
-    });
-  }
-
   void _preloadSounds() {
     _clickPlayers = Queue<AudioPlayer>.from(List.generate(
         10, (_) => AudioPlayer()..setSource(AssetSource('clique.wav'))));
@@ -111,7 +95,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
         bpmModel.updateBpm(bpmScheduler.valueToChange, true);
         bpmScheduler.lastChange = now;
 
-        //reinicia o metronome com os novos valores
+        // reinicia o metronome com os novos valores
         _metronome.stop();
         _metronome = Metronome(bpm: bpmModel.bpm, clicksPerBeat: clicksPerBeat);
         _metronome.onTick(_onTick);
@@ -171,14 +155,14 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
 
   void _togglePlayPause() {
     final isPlayingModel = Provider.of<IsPlayingModel>(context, listen: false);
+    final bpmScheduler = Provider.of<BpmSchedulerModel>(context, listen: false);
     setState(() {
       if (isPlayingModel.isPlaying) {
         _metronome.stop();
         _currentTick = 0;
         _currentCycle = 0;
+        bpmScheduler.desactiveScheduler();
       } else {
-        final bpmScheduler =
-            Provider.of<BpmSchedulerModel>(context, listen: false);
         final bpm = Provider.of<BpmModel>(context, listen: false).bpm;
         final clicksPerBeat =
             Provider.of<BeatsModel>(context, listen: false).beats;
@@ -209,119 +193,135 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     final GenreSelectedModel genreSelectedModel =
         Provider.of<GenreSelectedModel>(context);
 
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          isPlaying ? SizedBox.shrink() : BpmSetter(),
-          Container(
-            height: 240,
-            width: 240,
-            decoration: BoxDecoration(
-              color: colorModel.backgroundColor,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                '$_currentBeat',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'BellotaText',
+    final mediaQuery = MediaQuery.of(context);
+    final double screenWidth = mediaQuery.size.width;
+    final double screenHeight = mediaQuery.size.height;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Column(
+          children: [
+            BpmSetter(),
+            Container(
+              height: screenWidth * 0.6,
+              width: screenWidth * 0.6,
+              decoration: BoxDecoration(
+                color: colorModel.backgroundColor,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  '$_currentBeat',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: screenWidth * 0.12,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'BellotaText',
+                  ),
                 ),
               ),
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(right: 30.0),
-                child: Text(genreSelectedModel.genreSelected),
-              ),
-            ],
-          ),
-          const Padding(padding: EdgeInsets.all(12)),
-          isPlaying
-              ? const SizedBox.shrink()
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Column(
-                      children: [
-                        const Text(
-                          'Compasso',
-                          style: TextStyle(fontSize: 22),
-                        ),
-                        custom.ValueSetter<CompassoModel>(
-                          getValue: (model) => model.compasso,
-                          updateValue: (model, value, isIncrement) =>
-                              model.updateCompasso(value, isIncrement),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        const Text('Batidas', style: TextStyle(fontSize: 22)),
-                        custom.ValueSetter<BeatsModel>(
-                          getValue: (model) => model.beats,
-                          updateValue: (model, value, isIncrement) =>
-                              model.updateBeats(value, isIncrement),
-                        ),
-                      ],
-                    ),
-                  ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: screenWidth * 0.08),
+                  child: Text(
+                    genreSelectedModel.genreSelected,
+                    style: TextStyle(fontSize: screenWidth * 0.04),
+                  ),
                 ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Positioned(
-                child: IconButton(
-                  onPressed: _toggleIsVibrateOn,
-                  icon: isPlaying
-                      ? const Icon(null)
-                      : Icon(
+              ],
+            ),
+            SizedBox(height: screenHeight * 0.02),
+            isPlaying
+                ? const SizedBox.shrink()
+                : FutureBuilder(
+                    future: Future.delayed(Duration(milliseconds: 50)),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const SizedBox.shrink();
+                      } else {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Column(
+                              children: [
+                                Text(
+                                  'Compasso',
+                                  style:
+                                      TextStyle(fontSize: screenWidth * 0.05),
+                                ),
+                                custom.ValueSetter<CompassoModel>(
+                                  getValue: (model) => model.compasso,
+                                  updateValue: (model, value, isIncrement) =>
+                                      model.updateCompasso(value, isIncrement),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text('Batidas',
+                                    style: TextStyle(
+                                        fontSize: screenWidth * 0.05)),
+                                custom.ValueSetter<BeatsModel>(
+                                  getValue: (model) => model.beats,
+                                  updateValue: (model, value, isIncrement) =>
+                                      model.updateBeats(value, isIncrement),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      }
+                    },
+                  ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                isPlaying
+                    ? const SizedBox.shrink()
+                    : IconButton(
+                        onPressed: _toggleIsVibrateOn,
+                        icon: Icon(
                           Icons.vibration,
                           color: _isVibrating ? Colors.black : Colors.grey,
                         ),
-                  iconSize: 36,
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  _togglePlayPause();
-                },
-                icon: Container(
-                  height: 75,
-                  width: 75,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.black, width: 3),
+                        iconSize: screenWidth * 0.1,
+                      ),
+                IconButton(
+                  onPressed: () {
+                    _togglePlayPause();
+                  },
+                  icon: Container(
+                    height: screenWidth * 0.2,
+                    width: screenWidth * 0.2,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.black, width: 3),
+                    ),
+                    child: Icon(
+                      isPlaying ? Icons.pause : Icons.play_arrow,
+                      color: Colors.white,
+                    ),
                   ),
-                  child: Icon(
-                    isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white,
-                  ),
                 ),
-              ),
-              Positioned(
-                child: IconButton(
-                  onPressed: _toggleIsTorchOn,
-                  icon: isPlaying
-                      ? const Icon(null)
-                      : Icon(
+                isPlaying
+                    ? const SizedBox.shrink()
+                    : IconButton(
+                        onPressed: _toggleIsTorchOn,
+                        icon: Icon(
                           Icons.flashlight_on,
                           color: _isTorchOn ? Colors.black : Colors.grey,
                         ),
-                  iconSize: 36,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+                        iconSize: screenWidth * 0.1,
+                      ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
