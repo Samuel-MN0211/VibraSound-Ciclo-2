@@ -33,6 +33,8 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   int _currentTick = 0;
   int _currentCycle = 0;
   int _currentBeat = 0;
+  int timerRunning = 0;
+  Timer? _timer;
   late Queue<AudioPlayer> _clickPlayers;
   late Queue<AudioPlayer> _specialClickPlayers;
   late Duration _clickDuration;
@@ -95,7 +97,6 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
         bpmModel.updateBpm(bpmScheduler.valueToChange, true);
         bpmScheduler.lastChange = now;
 
-        // reinicia o metronome com os novos valores
         _metronome.stop();
         _metronome = Metronome(bpm: bpmModel.bpm, clicksPerBeat: clicksPerBeat);
         _metronome.onTick(_onTick);
@@ -153,6 +154,21 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     });
   }
 
+  String _formatTime(int totalSeconds) {
+    int minutes = totalSeconds ~/ 60;
+    int seconds = totalSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  void _timerRunning() {
+    _timer?.cancel();
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        timerRunning++;
+      });
+    });
+  }
+
   void _togglePlayPause() {
     final isPlayingModel = Provider.of<IsPlayingModel>(context, listen: false);
     final bpmScheduler = Provider.of<BpmSchedulerModel>(context, listen: false);
@@ -161,6 +177,8 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
         _metronome.stop();
         _currentTick = 0;
         _currentCycle = 0;
+        timerRunning = 0;
+        _timer?.cancel();
         bpmScheduler.desactiveScheduler();
       } else {
         final bpm = Provider.of<BpmModel>(context, listen: false).bpm;
@@ -173,6 +191,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
         _metronome = Metronome(bpm: bpm, clicksPerBeat: clicksPerBeat);
         _metronome.onTick(_onTick);
         _metronome.start();
+        _timerRunning();
       }
       isPlayingModel.isPlaying = !isPlayingModel.isPlaying;
     });
@@ -222,13 +241,25 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
               ),
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  margin: EdgeInsets.only(right: screenWidth * 0.08),
-                  child: Text(
-                    genreSelectedModel.genreSelected,
-                    style: TextStyle(fontSize: screenWidth * 0.04),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0),
+                  child: Container(
+                    child: Text(
+                      _formatTime(timerRunning),
+                      style: TextStyle(fontSize: screenWidth * 0.04),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0),
+                  child: Container(
+                    margin: EdgeInsets.only(right: screenWidth * 0.08),
+                    child: Text(
+                      genreSelectedModel.genreSelected,
+                      style: TextStyle(fontSize: screenWidth * 0.04),
+                    ),
                   ),
                 ),
               ],
@@ -237,7 +268,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
             isPlaying
                 ? const SizedBox.shrink()
                 : FutureBuilder(
-                    future: Future.delayed(Duration(milliseconds: 50)),
+                    future: Future.delayed(Duration(milliseconds: 100)),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const SizedBox.shrink();
