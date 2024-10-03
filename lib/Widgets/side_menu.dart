@@ -60,19 +60,12 @@ class NavigationDrawer extends StatelessWidget {
               showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    return AlertDialog(
+                    return const AlertDialog(
+        
+                      shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Color(0xFF095169), width: 2.5),
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
                       content: BpmScheduler(),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text(
-                            'Fechar',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ),
-                      ],
                     );
                   });
             },
