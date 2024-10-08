@@ -216,143 +216,140 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     final double screenWidth = mediaQuery.size.width;
     final double screenHeight = mediaQuery.size.height;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Column(
-          children: [
-            BpmSetter(),
-            Container(
-              height: screenWidth * 0.6,
-              width: screenWidth * 0.6,
-              decoration: BoxDecoration(
-                color: colorModel.backgroundColor,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  '$_currentBeat',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: screenWidth * 0.12,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'BellotaText',
-                  ),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          BpmSetter(),
+          Container(
+            height: screenWidth * 0.6,
+            width: screenWidth * 0.6,
+            decoration: BoxDecoration(
+              color: colorModel.backgroundColor,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                '$_currentBeat',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: screenWidth * 0.12,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'BellotaText',
                 ),
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0),
-                  child: Container(
-                    child: Text(
-                      _formatTime(timerRunning),
-                      style: TextStyle(fontSize: screenWidth * 0.04),
-                    ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0),
+                child: Container(
+                  child: Text(
+                    _formatTime(timerRunning),
+                    style: TextStyle(fontSize: screenWidth * 0.04),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0),
-                  child: Container(
-                    margin: EdgeInsets.only(right: screenWidth * 0.08),
-                    child: Text(
-                      genreSelectedModel.genreSelected,
-                      style: TextStyle(fontSize: screenWidth * 0.04),
-                    ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0),
+                child: Container(
+                  margin: EdgeInsets.only(right: screenWidth * 0.08),
+                  child: Text(
+                    genreSelectedModel.genreSelected,
+                    style: TextStyle(fontSize: screenWidth * 0.04),
                   ),
                 ),
-              ],
-            ),
-            SizedBox(height: screenHeight * 0.02),
-            isPlaying
-                ? const SizedBox.shrink()
-                : FutureBuilder(
-                    future: Future.delayed(Duration(milliseconds: 100)),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const SizedBox.shrink();
-                      } else {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Column(
-                              children: [
-                                Text(
-                                  'Compasso',
+              ),
+            ],
+          ),
+          SizedBox(height: screenHeight * 0.02),
+          isPlaying
+              ? const SizedBox.shrink()
+              : FutureBuilder(
+                  future: Future.delayed(Duration(milliseconds: 100)),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const SizedBox.shrink();
+                    } else {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Column(
+                            children: [
+                              Text(
+                                'Compasso',
+                                style: TextStyle(fontSize: screenWidth * 0.05),
+                              ),
+                              custom.ValueSetter<CompassoModel>(
+                                getValue: (model) => model.compasso,
+                                updateValue: (model, value, isIncrement) =>
+                                    model.updateCompasso(value, isIncrement),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text('Batidas',
                                   style:
-                                      TextStyle(fontSize: screenWidth * 0.05),
-                                ),
-                                custom.ValueSetter<CompassoModel>(
-                                  getValue: (model) => model.compasso,
-                                  updateValue: (model, value, isIncrement) =>
-                                      model.updateCompasso(value, isIncrement),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                Text('Batidas',
-                                    style: TextStyle(
-                                        fontSize: screenWidth * 0.05)),
-                                custom.ValueSetter<BeatsModel>(
-                                  getValue: (model) => model.beats,
-                                  updateValue: (model, value, isIncrement) =>
-                                      model.updateBeats(value, isIncrement),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      }
-                    },
-                  ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                isPlaying
-                    ? const SizedBox.shrink()
-                    : IconButton(
-                        onPressed: _toggleIsVibrateOn,
-                        icon: Icon(
-                          Icons.vibration,
-                          color: _isVibrating ? Colors.black : Colors.grey,
-                        ),
-                        iconSize: screenWidth * 0.1,
-                      ),
-                IconButton(
-                  onPressed: () {
-                    _togglePlayPause();
+                                      TextStyle(fontSize: screenWidth * 0.05)),
+                              custom.ValueSetter<BeatsModel>(
+                                getValue: (model) => model.beats,
+                                updateValue: (model, value, isIncrement) =>
+                                    model.updateBeats(value, isIncrement),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    }
                   },
-                  icon: Container(
-                    height: screenWidth * 0.2,
-                    width: screenWidth * 0.2,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.black, width: 3),
+                ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              isPlaying
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      onPressed: _toggleIsVibrateOn,
+                      icon: Icon(
+                        Icons.vibration,
+                        color: _isVibrating ? Colors.black : Colors.grey,
+                      ),
+                      iconSize: screenWidth * 0.1,
                     ),
-                    child: Icon(
-                      isPlaying ? Icons.pause : Icons.play_arrow,
-                      color: Colors.white,
-                    ),
+              IconButton(
+                onPressed: () {
+                  _togglePlayPause();
+                },
+                icon: Container(
+                  height: screenWidth * 0.2,
+                  width: screenWidth * 0.2,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.black, width: 3),
+                  ),
+                  child: Icon(
+                    isPlaying ? Icons.pause : Icons.play_arrow,
+                    color: Colors.white,
                   ),
                 ),
-                isPlaying
-                    ? const SizedBox.shrink()
-                    : IconButton(
-                        onPressed: _toggleIsTorchOn,
-                        icon: Icon(
-                          Icons.flashlight_on,
-                          color: _isTorchOn ? Colors.black : Colors.grey,
-                        ),
-                        iconSize: screenWidth * 0.1,
+              ),
+              isPlaying
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      onPressed: _toggleIsTorchOn,
+                      icon: Icon(
+                        Icons.flashlight_on,
+                        color: _isTorchOn ? Colors.black : Colors.grey,
                       ),
-              ],
-            ),
-          ],
-        );
-      },
+                      iconSize: screenWidth * 0.1,
+                    ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
