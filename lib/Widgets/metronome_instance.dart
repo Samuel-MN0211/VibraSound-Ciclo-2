@@ -107,6 +107,17 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
       }
     }
 
+    if (bpmModel.hasChanged) {
+      _metronome.stop();
+      _metronome = Metronome(bpm: bpmModel.bpm, clicksPerBeat: clicksPerBeat);
+      _metronome.onTick(_onTick);
+      _metronome.start();
+
+      interval = (60000 / (bpmModel.bpm * clicksPerBeat)).round();
+      vibrationDuration = interval ~/ 2;
+      bpmModel.resetChangeFlag();
+    }
+
     if (_currentTick % clicksPerBeat == 1) {
       _currentCycle++;
       _currentBeat = 1;
