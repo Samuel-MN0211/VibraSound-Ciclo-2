@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/genre_selected_model.dart';
 import 'package:metronomo_definitivo/Models/is_playing_model.dart';
+import 'package:metronomo_definitivo/Widgets/ticks_compasso.dart';
 import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
 import 'dart:async';
@@ -30,7 +31,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   bool _isTorchOn = false;
   bool _isVibrating = true;
   Timer? _clickTimer;
-  int _currentTick = 0;
+  //int _currentTick = 0;
   int _currentCycle = 0;
   int _currentBeat = 0;
   int timerRunning = 0;
@@ -77,7 +78,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   }
 
   void _onTick() {
-    _currentTick++;
+    //_currentTick++;
     _currentBeat++;
 
     final beatsPerMeasure =
@@ -107,7 +108,29 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
       }
     }
 
-    if (_currentTick % clicksPerBeat == 1) {
+    if (bpmModel.hasChanged) {
+      _metronome.stop();
+      _metronome = Metronome(bpm: bpmModel.bpm, clicksPerBeat: clicksPerBeat);
+      _metronome.onTick(_onTick);
+      _metronome.start();
+
+      interval = (60000 / (bpmModel.bpm * clicksPerBeat)).round();
+      vibrationDuration = interval ~/ 2;
+      bpmModel.resetChangeFlag();
+    }
+
+    if (bpmModel.hasChanged) {
+      _metronome.stop();
+      _metronome = Metronome(bpm: bpmModel.bpm, clicksPerBeat: clicksPerBeat);
+      _metronome.onTick(_onTick);
+      _metronome.start();
+
+      interval = (60000 / (bpmModel.bpm * clicksPerBeat)).round();
+      vibrationDuration = interval ~/ 2;
+      bpmModel.resetChangeFlag();
+    }
+
+    if (_currentBeat % clicksPerBeat == 1 || clicksPerBeat == 1) {
       _currentCycle++;
       _currentBeat = 1;
       vibrationDuration = (interval * 0.8).round();
@@ -175,7 +198,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     setState(() {
       if (isPlayingModel.isPlaying) {
         _metronome.stop();
-        _currentTick = 0;
+        _currentBeat = 0;
         _currentCycle = 0;
         timerRunning = 0;
         _timer?.cancel();
@@ -215,6 +238,8 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     final mediaQuery = MediaQuery.of(context);
     final double screenWidth = mediaQuery.size.width;
     final double screenHeight = mediaQuery.size.height;
+
+    int compasso = Provider.of<CompassoModel>(context).compasso;
 
     return SingleChildScrollView(
       child: Column(
@@ -348,7 +373,22 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
                     ),
             ],
           ),
-        ],
+            AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: isPlaying
+              ? Row(
+              key: ValueKey<int>(compasso),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                compasso,
+                (index) => (index == (_currentCycle - 1) % compasso)
+                  ? const SmallCircle(isWorking: true)
+                  : const SmallCircle(isWorking: false),
+              ),
+              )
+              : const SizedBox.shrink(),
+            ),
+        ],    
       ),
     );
   }

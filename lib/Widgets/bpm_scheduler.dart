@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/bpm_scheduler_model.dart';
 import 'package:provider/provider.dart';
@@ -132,8 +130,6 @@ class _BpmSchedulerState extends State<BpmScheduler> {
                 const SizedBox(height: 30,),
                         ],
                     ),
-                
-            
     );
   }
 }

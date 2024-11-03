@@ -31,16 +31,14 @@ class BpmSetter extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              isPlayingModel.isPlaying
-                  ? SizedBox.shrink()
-                  : IconButton(
-                      onPressed: () {
-                        bpmModel.updateBpm(-1, true);
-                        genreSelectedModel.genreSelected = '';
-                      },
-                      icon: Icon(Icons.remove),
-                      iconSize: iconSize,
-                    ),
+              IconButton(
+                onPressed: () {
+                  bpmModel.updateBpm(-1, true);
+                  genreSelectedModel.genreSelected = '';
+                },
+                icon: Icon(Icons.remove),
+                iconSize: iconSize,
+              ),
               Container(
                 child: Text(
                   '${bpmModel.bpm}',
@@ -52,16 +50,14 @@ class BpmSetter extends StatelessWidget {
                   ),
                 ),
               ),
-              isPlayingModel.isPlaying
-                  ? SizedBox.shrink()
-                  : IconButton(
-                      onPressed: () {
-                        bpmModel.updateBpm(1, true);
-                        genreSelectedModel.genreSelected = '';
-                      },
-                      icon: Icon(Icons.add),
-                      iconSize: iconSize,
-                    ),
+              IconButton(
+                onPressed: () {
+                  bpmModel.updateBpm(1, true);
+                  genreSelectedModel.genreSelected = '';
+                },
+                icon: Icon(Icons.add),
+                iconSize: iconSize,
+              ),
             ],
           ),
         ),
