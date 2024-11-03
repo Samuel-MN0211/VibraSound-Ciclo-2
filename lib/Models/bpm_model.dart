@@ -4,7 +4,9 @@ class BpmModel extends ChangeNotifier {
   int _bpm = 120;
   final int _bpmMax = 240;
   final int _bpmMin = 40;
+  bool _hasChanged = false;
 
+  bool get hasChanged => _hasChanged;
   int get bpm => _bpm;
 
   void updateBpm(int value, bool isIncrement) {
@@ -20,7 +22,12 @@ class BpmModel extends ChangeNotifier {
       _bpm = _bpmMin;
       return;
     }
+    _hasChanged = true;
     _bpm += value;
     notifyListeners();
+  }
+
+  void resetChangeFlag() {
+    _hasChanged = false;
   }
 }
