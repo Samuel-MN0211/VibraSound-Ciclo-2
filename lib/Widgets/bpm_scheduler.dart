@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/bpm_scheduler_model.dart';
 import 'package:provider/provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class BpmScheduler extends StatefulWidget {
   const BpmScheduler({Key? key}) : super(key: key);
@@ -107,11 +108,23 @@ class _BpmSchedulerState extends State<BpmScheduler> {
                       backgroundColor: const Color(0xFF095169),
                       shape: const RoundedRectangleBorder(borderRadius:BorderRadius.all(Radius.circular(5)))),
                     onPressed: () {
+                      
                       bool isIncrease = _selectedAction == 'Aumente';
                       int value =
                           isIncrease ? _bpmChange.abs() : -_bpmChange.abs();
                       bpmScheduler.activeScheduler(
                           value, _timeInterval, isIncrease);
+
+                      Navigator.pop(context, true);
+                      Fluttertoast.showToast(
+                        msg: "Temporizador ativado",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 1,
+                        backgroundColor: const Color(0xFF095169),
+                        textColor: Colors.white,
+                        fontSize: 16.0
+                      );
                     },
                     child: const Text('Ativar Temporizador', style: TextStyle(color: Colors.white),),
                   ),
