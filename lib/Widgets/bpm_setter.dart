@@ -22,179 +22,184 @@ class BpmSetter extends StatelessWidget {
     final double buttonHeight = screenHeight * 0.06;
     final double buttonFontSize = screenWidth * 0.04;
 
-    return Stack(
-      alignment: Alignment.center,
+    return Column(
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(
-              vertical: screenHeight * 0.1, horizontal: screenWidth * 0.05),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: () {
-                  bpmModel.updateBpm(-1, true);
-                  genreSelectedModel.genreSelected = '';
-                },
-                icon: Icon(Icons.remove),
-                iconSize: iconSize,
-              ),
-              Container(
-                child: Text(
-                  '${bpmModel.bpm}',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'BellotaText',
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            isPlayingModel.isPlaying
+                ? SizedBox.shrink()
+                : Positioned(
+                    top: screenHeight * 0.05,
+                    right: screenWidth * 0.12,
+                    child: GestureDetector(
+                      onTap: () {
+                        bpmModel.updateBpm(-10, true);
+                        genreSelectedModel.genreSelected = '';
+                      },
+                      child: Container(
+                        width: buttonWidth,
+                        height: buttonHeight,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          shape: BoxShape.rectangle,
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '-10',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: buttonFontSize,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  bpmModel.updateBpm(1, true);
-                  genreSelectedModel.genreSelected = '';
-                },
-                icon: Icon(Icons.add),
-                iconSize: iconSize,
-              ),
-            ],
-          ),
+            isPlayingModel.isPlaying
+                ? SizedBox.shrink()
+                : Positioned(
+                    top: screenHeight * 0.05,
+                    right: screenWidth * 0.12,
+                    child: GestureDetector(
+                      onTap: () {
+                        bpmModel.updateBpm(10, true);
+                        genreSelectedModel.genreSelected = '';
+                      },
+                      child: Container(
+                        width: buttonWidth,
+                        height: buttonHeight,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          shape: BoxShape.rectangle,
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '+10',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: buttonFontSize,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+          ],
         ),
-        isPlayingModel.isPlaying
-            ? SizedBox.shrink()
-            : Positioned(
-                top: screenHeight * 0.05,
-                right: screenWidth * 0.12,
-                child: GestureDetector(
-                  onTap: () {
-                    bpmModel.updateBpm(10, true);
-                    genreSelectedModel.genreSelected = '';
-                  },
-                  child: Container(
-                    width: buttonWidth,
-                    height: buttonHeight,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      shape: BoxShape.rectangle,
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '+10',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: buttonFontSize,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-        isPlayingModel.isPlaying
-            ? SizedBox.shrink()
-            : Positioned(
-                top: screenHeight * 0.05,
-                left: screenWidth * 0.12,
-                child: GestureDetector(
-                  onTap: () {
-                    bpmModel.updateBpm(-10, true);
-                    genreSelectedModel.genreSelected = '';
-                  },
-                  child: Container(
-                    width: buttonWidth,
-                    height: buttonHeight,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      shape: BoxShape.rectangle,
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '-10',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: buttonFontSize,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-        isPlayingModel.isPlaying
-            ? SizedBox.shrink()
-            : Positioned(
-                bottom: screenHeight * 0.05,
-                right: screenWidth * 0.12,
-                child: GestureDetector(
-                  onTap: () {
-                    bpmModel.updateBpm(5, true);
-                    genreSelectedModel.genreSelected = '';
-                  },
-                  child: Container(
-                    width: buttonWidth,
-                    height: buttonHeight,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      shape: BoxShape.rectangle,
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '+5',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: buttonFontSize,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-        isPlayingModel.isPlaying
-            ? SizedBox.shrink()
-            : Positioned(
-                bottom: screenHeight * 0.05,
-                left: screenWidth * 0.12,
-                child: GestureDetector(
-                  onTap: () {
-                    bpmModel.updateBpm(-5, true);
-                    genreSelectedModel.genreSelected = '';
-                  },
-                  child: Container(
-                    width: buttonWidth,
-                    height: buttonHeight,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      shape: BoxShape.rectangle,
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '-5',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: buttonFontSize,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-        Positioned(
-          bottom: screenHeight * 0.06,
-          child: Text(
-            'BPM',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: screenWidth * 0.05,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              onPressed: () {
+                bpmModel.updateBpm(-1, true);
+                genreSelectedModel.genreSelected = '';
+              },
+              icon: Icon(Icons.remove),
+              iconSize: iconSize,
             ),
-          ),
+            Text(
+              '${bpmModel.bpm}',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'BellotaText',
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                bpmModel.updateBpm(1, true);
+                genreSelectedModel.genreSelected = '';
+              },
+              icon: Icon(Icons.add),
+              iconSize: iconSize,
+            ),
+          ],
         ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            isPlayingModel.isPlaying
+                ? SizedBox.shrink()
+                : Positioned(
+                    bottom: screenHeight * 0.05,
+                    left: screenWidth * 0.12,
+                    child: GestureDetector(
+                      onTap: () {
+                        bpmModel.updateBpm(-5, true);
+                        genreSelectedModel.genreSelected = '';
+                      },
+                      child: Container(
+                        width: buttonWidth,
+                        height: buttonHeight,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          shape: BoxShape.rectangle,
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '-5',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: buttonFontSize,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+            isPlayingModel.isPlaying
+                ? SizedBox.shrink()
+                : Positioned(
+                    bottom: screenHeight * 0.05,
+                    right: screenWidth * 0.12,
+                    child: GestureDetector(
+                      onTap: () {
+                        bpmModel.updateBpm(5, true);
+                        genreSelectedModel.genreSelected = '';
+                      },
+                      child: Container(
+                        width: buttonWidth,
+                        height: buttonHeight,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          shape: BoxShape.rectangle,
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '+5',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: buttonFontSize,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+          ],
+        )
+        //
+
+        //   Positioned(
+        //     bottom: screenHeight * 0.06,
+        //     child: Text(
+        //       'BPM',
+        //       style: TextStyle(
+        //         color: Colors.black,
+        //         fontSize: screenWidth * 0.05,
+        //       ),
+        //     ),
+        //   ),
       ],
     );
   }

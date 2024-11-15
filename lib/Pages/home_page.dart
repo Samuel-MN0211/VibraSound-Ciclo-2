@@ -83,9 +83,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             drawer: const side_menu.NavigationDrawer(),
-            body: const Center(
-              child: MetronomeInstance(),
-            ),
+            body: MetronomeInstance(),
           ),
         ),
       ],

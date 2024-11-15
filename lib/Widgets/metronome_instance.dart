@@ -239,12 +239,20 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     final double screenWidth = mediaQuery.size.width;
     final double screenHeight = mediaQuery.size.height;
 
+    final double spaceSize = screenHeight * 0.03;
+
     int compasso = Provider.of<CompassoModel>(context).compasso;
 
     return SingleChildScrollView(
       child: Column(
         children: [
+          Padding(
+            padding: EdgeInsets.all(spaceSize),
+          ),
           BpmSetter(),
+          Padding(
+            padding: EdgeInsets.all(spaceSize - 13),
+          ),
           Container(
             height: screenWidth * 0.6,
             width: screenWidth * 0.6,
@@ -288,7 +296,6 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
               ),
             ],
           ),
-          SizedBox(height: screenHeight * 0.02),
           isPlaying
               ? const SizedBox.shrink()
               : FutureBuilder(
@@ -373,22 +380,24 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
                     ),
             ],
           ),
-            AnimatedSwitcher(
+          AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: isPlaying
-              ? Row(
-              key: ValueKey<int>(compasso),
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                compasso,
-                (index) => (index == (_currentCycle - 1) % compasso)
-                  ? const SmallCircle(isWorking: true)
-                  : const SmallCircle(isWorking: false),
-              ),
-              )
-              : const SizedBox.shrink(),
-            ),
-        ],    
+                ? Expanded(
+                    child: Row(
+                      key: ValueKey<int>(compasso),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        compasso,
+                        (index) => (index == (_currentCycle - 1) % compasso)
+                            ? const SmallCircle(isWorking: true)
+                            : const SmallCircle(isWorking: false),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
       ),
     );
   }
