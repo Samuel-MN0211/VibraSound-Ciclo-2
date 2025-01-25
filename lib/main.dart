@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/beats_model.dart';
 import 'package:metronomo_definitivo/Models/bpm_model.dart';
 import 'package:metronomo_definitivo/Models/bpm_scheduler_model.dart';
+import 'package:metronomo_definitivo/controllers/metronome_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
 import 'Models/color_model.dart';
@@ -23,6 +24,7 @@ class MetronomeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => MetronomeController()),
         ChangeNotifierProvider(create: (context) => BpmSchedulerModel()),
         ChangeNotifierProvider(create: (context) => BpmModel()),
         ChangeNotifierProvider(create: (context) => CompassoModel()),

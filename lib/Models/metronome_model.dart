@@ -9,6 +9,10 @@ class Metronome {
 
   Metronome({required this.bpm, this.clicksPerBeat = 1});
 
+  get isPlaying => _isPlaying;
+  get currentBpm => bpm;
+  get currentClicksPerBeat => clicksPerBeat;
+
   void start() {
     if (_isPlaying) return;
     _isPlaying = true;
@@ -23,24 +27,8 @@ class Metronome {
     _isPlaying = false;
   }
 
-  void setBPM(int newBpm) {
-    bpm = newBpm;
-    if (_isPlaying) {
-      stop();
-      start();
-    }
-  }
-
-  void setClicksPerBeat(int clicks) {
-    clicksPerBeat = clicks;
-  }
-
   void onTick(Function callback) {
     _onTick = callback;
-  }
-
-  bool isPlaying() {
-    return _isPlaying;
   }
 
   void dispose() {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/genre_selected_model.dart';
 import 'package:metronomo_definitivo/Models/is_playing_model.dart';
 import 'package:metronomo_definitivo/Widgets/ticks_compasso.dart';
+import 'package:metronomo_definitivo/controllers/metronome_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
 import 'dart:async';
@@ -27,7 +28,7 @@ class MetronomeInstance extends StatefulWidget {
 }
 
 class MetronomeInstanceState extends State<MetronomeInstance> {
-  late Metronome _metronome;
+  final MetronomeController _metronome = MetronomeController();
   bool _isTorchOn = false;
   bool _isVibrating = true;
   Timer? _clickTimer;
@@ -78,6 +79,8 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   }
 
   void _onTick() {
+    final MetronomeController metronome =
+        Provider.of<MetronomeController>(context, listen: false);
     //_currentTick++;
     _currentBeat++;
 
@@ -85,50 +88,39 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
         Provider.of<CompassoModel>(context, listen: false).compasso;
     final clicksPerBeat = Provider.of<BeatsModel>(context, listen: false).beats;
     final colorModel = Provider.of<ColorModel>(context, listen: false);
-    final bpmModel = Provider.of<BpmModel>(context, listen: false);
+
     final bpmScheduler = Provider.of<BpmSchedulerModel>(context, listen: false);
 
-    int interval = (60000 / (bpmModel.bpm * clicksPerBeat)).round();
+    int interval = (60000 / (metronome.bpm * clicksPerBeat)).round();
     int vibrationDuration = interval ~/ 2;
 
     if (bpmScheduler.isActivated) {
       final now = DateTime.now();
       if (now.difference(bpmScheduler.lastChange).inSeconds >=
           bpmScheduler.secondsToMakeChange) {
-        bpmModel.updateBpm(bpmScheduler.valueToChange, true);
+        metronome.updateBpm(bpmScheduler.valueToChange);
         bpmScheduler.lastChange = now;
 
-        _metronome.stop();
-        _metronome = Metronome(bpm: bpmModel.bpm, clicksPerBeat: clicksPerBeat);
-        _metronome.onTick(_onTick);
-        _metronome.start();
+        metronome.stop();
+        metronome.newMetronome(metronome.bpm, clicksPerBeat);
+        metronome.onTick(_onTick);
+        metronome.start();
 
-        interval = (60000 / (bpmModel.bpm * clicksPerBeat)).round();
+        interval = (60000 / (metronome.bpm * clicksPerBeat)).round();
         vibrationDuration = interval ~/ 2;
       }
     }
 
-    if (bpmModel.hasChanged) {
-      _metronome.stop();
-      _metronome = Metronome(bpm: bpmModel.bpm, clicksPerBeat: clicksPerBeat);
-      _metronome.onTick(_onTick);
-      _metronome.start();
+    // if (bpmModel.hasChanged) {
+    //   _metronome.stop();
+    //   _metronome = Metronome(bpm: bpmModel.bpm, clicksPerBeat: clicksPerBeat);
+    //   _metronome.onTick(_onTick);
+    //   _metronome.start();
 
-      interval = (60000 / (bpmModel.bpm * clicksPerBeat)).round();
-      vibrationDuration = interval ~/ 2;
-      bpmModel.resetChangeFlag();
-    }
-
-    if (bpmModel.hasChanged) {
-      _metronome.stop();
-      _metronome = Metronome(bpm: bpmModel.bpm, clicksPerBeat: clicksPerBeat);
-      _metronome.onTick(_onTick);
-      _metronome.start();
-
-      interval = (60000 / (bpmModel.bpm * clicksPerBeat)).round();
-      vibrationDuration = interval ~/ 2;
-      bpmModel.resetChangeFlag();
-    }
+    //   interval = (60000 / (bpmModel.bpm * clicksPerBeat)).round();
+    //   vibrationDuration = interval ~/ 2;
+    //   bpmModel.resetChangeFlag();
+    // }
 
     if (_currentBeat % clicksPerBeat == 1 || clicksPerBeat == 1) {
       _currentCycle++;
@@ -195,9 +187,11 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   void _togglePlayPause() {
     final isPlayingModel = Provider.of<IsPlayingModel>(context, listen: false);
     final bpmScheduler = Provider.of<BpmSchedulerModel>(context, listen: false);
+    final MetronomeController metronome =
+        Provider.of<MetronomeController>(context, listen: false);
     setState(() {
       if (isPlayingModel.isPlaying) {
-        _metronome.stop();
+        metronome.stop();
         _currentBeat = 0;
         _currentCycle = 0;
         timerRunning = 0;
@@ -211,9 +205,9 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
         if (bpmScheduler.isActivated) {
           bpmScheduler.lastChange = DateTime.now();
         }
-        _metronome = Metronome(bpm: bpm, clicksPerBeat: clicksPerBeat);
-        _metronome.onTick(_onTick);
-        _metronome.start();
+        metronome.newMetronome(metronome.bpm, clicksPerBeat);
+        metronome.onTick(_onTick);
+        metronome.start();
         _timerRunning();
       }
       isPlayingModel.isPlaying = !isPlayingModel.isPlaying;
