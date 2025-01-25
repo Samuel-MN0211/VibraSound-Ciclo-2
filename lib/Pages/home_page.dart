@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/color_model.dart';
+import 'package:metronomo_definitivo/controllers/metronome_controller.dart';
 import 'package:provider/provider.dart';
-import '../Models/is_playing_model.dart';
+// import '../Models/is_playing_model.dart';
 import '../Widgets/metronome_instance.dart';
 import '../Widgets/side_menu.dart' as side_menu;
 
@@ -15,7 +16,7 @@ class MetronomeApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ColorModel()),
-        ChangeNotifierProvider(create: (context) => IsPlayingModel()),
+        ChangeNotifierProvider(create: (context) => MetronomeController()),
       ],
       child: MaterialApp(
         title: 'VIBRASOM',
@@ -43,8 +44,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isPlayingModel = Provider.of<IsPlayingModel>(context);
+    // final isPlayingModel = Provider.of<IsPlayingModel>(context);
     final colorModel = Provider.of<ColorModel>(context);
+    final metronome = Provider.of<MetronomeController>(context);
 
     return Stack(
       alignment: Alignment.center,
@@ -57,19 +59,17 @@ class _HomePageState extends State<HomePage> {
         AnimatedContainer(
           curve: Curves.easeInQuart,
           duration: const Duration(milliseconds: 350),
-          width: isPlayingModel.isPlaying
+          width: metronome.isPlaying
               ? MediaQuery.of(context).size.width * 0.85
               : MediaQuery.of(context).size.width,
-          height: isPlayingModel.isPlaying
+          height: metronome.isPlaying
               ? MediaQuery.of(context).size.height * 0.85
               : MediaQuery.of(context).size.height,
           child: Scaffold(
             appBar: AppBar(
               backgroundColor: const Color(0xFF095169),
               iconTheme: IconThemeData(
-                color: isPlayingModel.isPlaying
-                    ? Colors.transparent
-                    : Colors.white,
+                color: metronome.isPlaying ? Colors.transparent : Colors.white,
               ),
               centerTitle: true,
               title: const Text(
@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             drawer: const side_menu.NavigationDrawer(),
-            body: MetronomeInstance(),
+            body: const MetronomeInstance(),
           ),
         ),
       ],

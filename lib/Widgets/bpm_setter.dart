@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/genre_selected_model.dart';
-import 'package:metronomo_definitivo/Models/is_playing_model.dart';
+// import 'package:metronomo_definitivo/Models/is_playing_model.dart';
 import 'package:metronomo_definitivo/controllers/metronome_controller.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +11,7 @@ class BpmSetter extends StatelessWidget {
         Provider.of<MetronomeController>(context);
     final GenreSelectedModel genreSelectedModel =
         Provider.of<GenreSelectedModel>(context);
-    final IsPlayingModel isPlayingModel = Provider.of<IsPlayingModel>(context);
+    // final IsPlayingModel isPlayingModel = Provider.of<IsPlayingModel>(context);
 
     final mediaQuery = MediaQuery.of(context);
     final double screenWidth = mediaQuery.size.width;
@@ -24,7 +24,7 @@ class BpmSetter extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            isPlayingModel.isPlaying
+            metronome.isPlaying
                 ? const SizedBox.shrink()
                 : Positioned(
                     top: screenHeight * 0.05,
@@ -37,7 +37,7 @@ class BpmSetter extends StatelessWidget {
                       child: _setter(context, '-10'),
                     ),
                   ),
-            isPlayingModel.isPlaying
+            metronome.isPlaying
                 ? const SizedBox.shrink()
                 : Positioned(
                     top: screenHeight * 0.05,
@@ -85,7 +85,7 @@ class BpmSetter extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            isPlayingModel.isPlaying
+            metronome.isPlaying
                 ? const SizedBox.shrink()
                 : Positioned(
                     bottom: screenHeight * 0.05,
@@ -98,7 +98,7 @@ class BpmSetter extends StatelessWidget {
                       child: _setter(context, '-5'),
                     ),
                   ),
-            isPlayingModel.isPlaying
+            metronome.isPlaying
                 ? const SizedBox.shrink()
                 : Positioned(
                     bottom: screenHeight * 0.05,

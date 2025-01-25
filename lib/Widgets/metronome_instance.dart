@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/genre_selected_model.dart';
-import 'package:metronomo_definitivo/Models/is_playing_model.dart';
 import 'package:metronomo_definitivo/Widgets/ticks_compasso.dart';
 import 'package:metronomo_definitivo/controllers/metronome_controller.dart';
 import 'package:provider/provider.dart';
@@ -8,14 +7,9 @@ import 'package:torch_controller/torch_controller.dart';
 import 'dart:async';
 import 'package:vibration/vibration.dart';
 import 'package:audioplayers/audioplayers.dart';
-import '../Models/beats_model.dart';
-import '../Models/bpm_model.dart';
 import '../Models/bpm_scheduler_model.dart';
 import 'bpm_setter.dart';
 import '../Models/color_model.dart';
-import '../Models/compasso_model.dart';
-import '../Models/metronome_model.dart';
-import 'value_setter.dart' as custom;
 import 'dart:collection'; // Import necessário para a Queue
 
 class MetronomeInstance extends StatefulWidget {
@@ -28,7 +22,7 @@ class MetronomeInstance extends StatefulWidget {
 }
 
 class MetronomeInstanceState extends State<MetronomeInstance> {
-  final MetronomeController _metronome = MetronomeController();
+  late MetronomeController metronome;
   bool _isTorchOn = false;
   bool _isVibrating = true;
   Timer? _clickTimer;
@@ -48,6 +42,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   @override
   void initState() {
     super.initState();
+    metronome = Provider.of<MetronomeController>(context, listen: false);
     _preloadSounds();
   }
 
@@ -79,34 +74,27 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   }
 
   void _onTick() {
-    final MetronomeController metronome =
-        Provider.of<MetronomeController>(context, listen: false);
-    //_currentTick++;
     _currentBeat++;
-
-    final beatsPerMeasure =
-        Provider.of<CompassoModel>(context, listen: false).compasso;
-    final clicksPerBeat = Provider.of<BeatsModel>(context, listen: false).beats;
     final colorModel = Provider.of<ColorModel>(context, listen: false);
 
     final bpmScheduler = Provider.of<BpmSchedulerModel>(context, listen: false);
 
-    int interval = (60000 / (metronome.bpm * clicksPerBeat)).round();
+    int interval = (60000 / (metronome.bpm * metronome.clicksPerBeat)).round();
     int vibrationDuration = interval ~/ 2;
 
     if (bpmScheduler.isActivated) {
       final now = DateTime.now();
       if (now.difference(bpmScheduler.lastChange).inSeconds >=
           bpmScheduler.secondsToMakeChange) {
-        metronome.updateBpm(bpmScheduler.valueToChange);
+        metronome.updateBpm(metronome.bpm + bpmScheduler.valueToChange);
         bpmScheduler.lastChange = now;
 
         metronome.stop();
-        metronome.newMetronome(metronome.bpm, clicksPerBeat);
+        metronome.newMetronome();
         metronome.onTick(_onTick);
         metronome.start();
 
-        interval = (60000 / (metronome.bpm * clicksPerBeat)).round();
+        interval = (60000 / (metronome.bpm * metronome.clicksPerBeat)).round();
         vibrationDuration = interval ~/ 2;
       }
     }
@@ -122,7 +110,8 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     //   bpmModel.resetChangeFlag();
     // }
 
-    if (_currentBeat % clicksPerBeat == 1 || clicksPerBeat == 1) {
+    if (_currentBeat % metronome.clicksPerBeat == 1 ||
+        metronome.clicksPerBeat == 1) {
       _currentCycle++;
       _currentBeat = 1;
       vibrationDuration = (interval * 0.8).round();
@@ -137,7 +126,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
 
     _vibrateOn(_isVibrating, vibrationDuration);
 
-    if (_currentCycle > beatsPerMeasure) {
+    if (_currentCycle > metronome.beatsPerMeasure) {
       _currentCycle = 1;
     }
   }
@@ -177,7 +166,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
 
   void _timerRunning() {
     _timer?.cancel();
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         timerRunning++;
       });
@@ -185,12 +174,9 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   }
 
   void _togglePlayPause() {
-    final isPlayingModel = Provider.of<IsPlayingModel>(context, listen: false);
     final bpmScheduler = Provider.of<BpmSchedulerModel>(context, listen: false);
-    final MetronomeController metronome =
-        Provider.of<MetronomeController>(context, listen: false);
     setState(() {
-      if (isPlayingModel.isPlaying) {
+      if (metronome.isPlaying) {
         metronome.stop();
         _currentBeat = 0;
         _currentCycle = 0;
@@ -198,33 +184,26 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
         _timer?.cancel();
         bpmScheduler.desactiveScheduler();
       } else {
-        final bpm = Provider.of<BpmModel>(context, listen: false).bpm;
-        final clicksPerBeat =
-            Provider.of<BeatsModel>(context, listen: false).beats;
-
         if (bpmScheduler.isActivated) {
           bpmScheduler.lastChange = DateTime.now();
         }
-        metronome.newMetronome(metronome.bpm, clicksPerBeat);
+        metronome.newMetronome();
         metronome.onTick(_onTick);
         metronome.start();
         _timerRunning();
       }
-      isPlayingModel.isPlaying = !isPlayingModel.isPlaying;
     });
   }
 
   @override
   void dispose() {
-    _metronome.dispose();
+    metronome.dispose();
     _clickTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isPlayingModel = Provider.of<IsPlayingModel>(context);
-    final isPlaying = isPlayingModel.isPlaying;
     final mediaQuery = MediaQuery.of(context);
     final double screenHeight = mediaQuery.size.height;
 
@@ -245,28 +224,28 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [_runningTimer(), _genreSelect()],
           ),
-          isPlaying
+          metronome.isPlaying
               ? const SizedBox.shrink()
               : Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Column(
-                      children: [_compasso()],
+                      children: [_beatsPerMeasure()],
                     ),
                     Column(
-                      children: [_batidas()],
+                      children: [_clickPerBeats()],
                     ),
                   ],
                 ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              isPlaying ? const SizedBox.shrink() : _toggleVibrate(),
+              metronome.isPlaying ? const SizedBox.shrink() : _toggleVibrate(),
               _togglePlay(),
-              isPlaying ? const SizedBox.shrink() : _toggleTorch()
+              metronome.isPlaying ? const SizedBox.shrink() : _toggleTorch()
             ],
           ),
-          _compassoSwitcher(),
+          _beatsPerMeasureSwitcher(),
         ],
       ),
     );
@@ -326,7 +305,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     );
   }
 
-  Widget _compasso() {
+  Widget _beatsPerMeasure() {
     final mediaQuery = MediaQuery.of(context);
     final double screenWidth = mediaQuery.size.width;
     return Column(
@@ -335,26 +314,18 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
           'Compasso',
           style: TextStyle(fontSize: screenWidth * 0.05),
         ),
-        custom.ValueSetter<CompassoModel>(
-          getValue: (model) => model.compasso,
-          updateValue: (model, value, isIncrement) =>
-              model.updateCompasso(value, isIncrement),
-        )
+        _beatsPerMeasureSetter()
       ],
     );
   }
 
-  Widget _batidas() {
+  Widget _clickPerBeats() {
     final mediaQuery = MediaQuery.of(context);
     final double screenWidth = mediaQuery.size.width;
     return Column(
       children: [
         Text('Batidas', style: TextStyle(fontSize: screenWidth * 0.05)),
-        custom.ValueSetter<BeatsModel>(
-          getValue: (model) => model.beats,
-          updateValue: (model, value, isIncrement) =>
-              model.updateBeats(value, isIncrement),
-        )
+        _clicksPerBeatSetter()
       ],
     );
   }
@@ -375,8 +346,6 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   Widget _togglePlay() {
     final mediaQuery = MediaQuery.of(context);
     final double screenWidth = mediaQuery.size.width;
-    final IsPlayingModel isPlayingModel = Provider.of<IsPlayingModel>(context);
-    bool isPlaying = isPlayingModel.isPlaying;
     return IconButton(
       onPressed: () {
         _togglePlayPause();
@@ -390,7 +359,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
           border: Border.all(color: Colors.black, width: 3),
         ),
         child: Icon(
-          isPlaying ? Icons.pause : Icons.play_arrow,
+          metronome.isPlaying ? Icons.pause : Icons.play_arrow,
           color: Colors.white,
         ),
       ),
@@ -410,26 +379,96 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     );
   }
 
-  Widget _compassoSwitcher() {
-    final IsPlayingModel isPlayingModel = Provider.of<IsPlayingModel>(context);
-    bool isPlaying = isPlayingModel.isPlaying;
-    final compasso = Provider.of<CompassoModel>(context).compasso;
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      child: isPlaying
-          ? Expanded(
-              child: Row(
-                key: ValueKey<int>(compasso),
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  compasso,
-                  (index) => (index == (_currentCycle - 1) % compasso)
-                      ? const SmallCircle(isWorking: true)
-                      : const SmallCircle(isWorking: false),
-                ),
+  Widget _beatsPerMeasureSwitcher() {
+    return Consumer<MetronomeController>(
+        builder: (context, metronome, child) => AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: metronome.isPlaying
+                  ? Expanded(
+                      child: Row(
+                        key: ValueKey<int>(metronome.beatsPerMeasure),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          metronome.beatsPerMeasure,
+                          (index) => (index ==
+                                  (_currentCycle - 1) %
+                                      metronome.beatsPerMeasure)
+                              ? const SmallCircle(isWorking: true)
+                              : const SmallCircle(isWorking: false),
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ));
+  }
+
+  Widget _clicksPerBeatSetter() {
+    return Consumer<MetronomeController>(
+      builder: (context, metronome, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              onPressed: () {
+                metronome.updateClicksPerBeat(metronome.clicksPerBeat - 1);
+              },
+              icon: const Icon(Icons.remove),
+              iconSize: 28,
+            ),
+            Text(
+              '${metronome.clicksPerBeat}',
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'BellotaText',
               ),
-            )
-          : const SizedBox.shrink(),
+            ),
+            IconButton(
+              onPressed: () {
+                metronome.updateClicksPerBeat(metronome.clicksPerBeat + 1);
+              },
+              icon: const Icon(Icons.add),
+              iconSize: 25,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _beatsPerMeasureSetter() {
+    return Consumer<MetronomeController>(
+      builder: (context, metronome, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              onPressed: () {
+                metronome.updateBeatsPerMeasure(metronome.beatsPerMeasure - 1);
+              },
+              icon: const Icon(Icons.remove),
+              iconSize: 28,
+            ),
+            Text(
+              '${metronome.beatsPerMeasure}',
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'BellotaText',
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                metronome.updateBeatsPerMeasure(metronome.beatsPerMeasure + 1);
+              },
+              icon: const Icon(Icons.add),
+              iconSize: 25,
+            ),
+          ],
+        );
+      },
     );
   }
 }

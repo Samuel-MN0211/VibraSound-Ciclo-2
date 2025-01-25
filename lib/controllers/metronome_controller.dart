@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/metronome_model.dart';
 
 class MetronomeController extends ChangeNotifier {
-  Metronome _metronome = Metronome(bpm: 120);
+  Metronome _metronome =
+      Metronome(bpm: 120, clicksPerBeat: 3, beatsPerMeasure: 4);
 
-  get bpm => _metronome.currentBpm;
-  get clicksPerBeat => _metronome.currentClicksPerBeat;
-  get isPlaying => _metronome.isPlaying;
+  int get bpm => _metronome.currentBpm;
+  int get clicksPerBeat => _metronome.currentClicksPerBeat;
+  int get beatsPerMeasure => _metronome.currentBeatsPerMeasure;
+  bool get isPlaying => _metronome.isPlaying;
 
   void start() {
     _metronome.start();
@@ -19,11 +21,19 @@ class MetronomeController extends ChangeNotifier {
   }
 
   void onTick(Function callback) {
-    _metronome.onTick(callback);
+    _metronome.onTick(() {
+      callback();
+      notifyListeners();
+    });
   }
 
-  void newMetronome(int bpm, int clicksPerBeat) {
-    _metronome = Metronome(bpm: _metronome.bpm, clicksPerBeat: clicksPerBeat);
+  void newMetronome() {
+    _metronome = Metronome(
+      bpm: bpm,
+      clicksPerBeat: clicksPerBeat,
+      beatsPerMeasure: beatsPerMeasure,
+      isPlaying: isPlaying,
+    );
     notifyListeners();
   }
 
@@ -34,6 +44,16 @@ class MetronomeController extends ChangeNotifier {
 
   void updateClicksPerBeat(int value) {
     _metronome.clicksPerBeat = value;
+    notifyListeners();
+  }
+
+  void updateIsPlaying(bool value) {
+    _metronome.isPlaying = value;
+    notifyListeners();
+  }
+
+  void updateBeatsPerMeasure(int value) {
+    _metronome.beatsPerMeasure = value;
     notifyListeners();
   }
 }
