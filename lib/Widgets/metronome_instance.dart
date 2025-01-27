@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/genre_selected_model.dart';
 import 'package:metronomo_definitivo/Widgets/ticks_compasso.dart';
 import 'package:metronomo_definitivo/controllers/metronome_controller.dart';
+import 'package:metronomo_definitivo/controllers/sound_controller.dart';
+import 'package:metronomo_definitivo/controllers/vibration_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
 import 'dart:async';
@@ -26,48 +28,53 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   Timer? _clickTimer;
   int timerRunning = 0;
   Timer? _timer;
-  late Queue<AudioPlayer> _clickPlayers;
-  late Queue<AudioPlayer> _specialClickPlayers;
-  late Duration _clickDuration;
-  late Duration _specialClickDuration;
+  // late Queue<AudioPlayer> _clickPlayers;
+  // late Queue<AudioPlayer> _specialClickPlayers;
+  // late Duration _clickDuration;
+  // late Duration _specialClickDuration;
 
   // Controllers
   final TorchController _torchController = TorchController();
   late MetronomeController metronome;
+  late SoundController soundController;
+  late VibrationController vibrationController;
 
   @override
   void initState() {
     super.initState();
     metronome = Provider.of<MetronomeController>(context, listen: false);
-    _preloadSounds();
+    soundController = Provider.of<SoundController>(context, listen: false);
+    vibrationController =
+        Provider.of<VibrationController>(context, listen: false);
+    soundController.preloadSounds();
   }
 
-  void _preloadSounds() {
-    _clickPlayers = Queue<AudioPlayer>.from(List.generate(
-        10, (_) => AudioPlayer()..setSource(AssetSource('clique.wav'))));
-    _specialClickPlayers = Queue<AudioPlayer>.from(List.generate(
-        10, (_) => AudioPlayer()..setSource(AssetSource('tick.wav'))));
+  // void _preloadSounds() {
+  //   _clickPlayers = Queue<AudioPlayer>.from(List.generate(
+  //       10, (_) => AudioPlayer()..setSource(AssetSource('clique.wav'))));
+  //   _specialClickPlayers = Queue<AudioPlayer>.from(List.generate(
+  //       10, (_) => AudioPlayer()..setSource(AssetSource('tick.wav'))));
 
-    _clickPlayers.first.onDurationChanged.listen((Duration d) {
-      setState(() => _clickDuration = d);
-    });
+  //   _clickPlayers.first.onDurationChanged.listen((Duration d) {
+  //     setState(() => _clickDuration = d);
+  //   });
 
-    _specialClickPlayers.first.onDurationChanged.listen((Duration d) {
-      setState(() => _specialClickDuration = d);
-    });
-  }
+  //   _specialClickPlayers.first.onDurationChanged.listen((Duration d) {
+  //     setState(() => _specialClickDuration = d);
+  //   });
+  // }
 
-  void _playSound(
-      Queue<AudioPlayer> players, Duration duration, String audioFile) {
-    final player = players.removeFirst();
-    player.seek(Duration.zero);
-    player.resume();
+  // void _playSound(
+  //     Queue<AudioPlayer> players, Duration duration, String audioFile) {
+  //   final player = players.removeFirst();
+  //   player.seek(Duration.zero);
+  //   player.resume();
 
-    Future.delayed(duration * 0.95, () {
-      player.stop();
-      players.addLast(AudioPlayer()..setSource(AssetSource(audioFile)));
-    });
-  }
+  //   Future.delayed(duration * 0.95, () {
+  //     player.stop();
+  //     players.addLast(AudioPlayer()..setSource(AssetSource(audioFile)));
+  //   });
+  // }
 
   void _onTick() {
     setState(() {
@@ -116,25 +123,25 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
       vibrationDuration = (interval * 0.8).round();
       metronome.changeToBlack();
       _torchOn(_isTorchOn, vibrationDuration);
-      _playSound(_specialClickPlayers, _specialClickDuration, 'tick.wav');
+      soundController.playSpecialClick();
     } else {
       _torchOn(_isTorchOn, vibrationDuration);
-      _playSound(_clickPlayers, _clickDuration, 'clique.wav');
+      soundController.playClick();
       metronome.changeToRandomColor();
     }
 
-    _vibrateOn(_isVibrating, vibrationDuration);
+    vibrationController.vibrate(vibrationDuration);
 
     if (metronome.currentCycle > metronome.beatsPerMeasure) {
       metronome.updateCurrentCycle(1);
     }
   }
 
-  void _vibrateOn(bool isVibratingOn, int vibrationDuration) {
-    if (isVibratingOn) {
-      Vibration.vibrate(duration: vibrationDuration);
-    }
-  }
+  // void _vibrateOn(bool isVibratingOn, int vibrationDuration) {
+  //   if (isVibratingOn) {
+  //     Vibration.vibrate(duration: vibrationDuration);
+  //   }
+  // }
 
   void _torchOn(bool isTorchOn, int vibrationDuration) {
     if (isTorchOn) {
@@ -147,7 +154,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
 
   void _toggleIsVibrateOn() {
     setState(() {
-      _isVibrating = !_isVibrating;
+      vibrationController.toggleVibration();
     });
   }
 
@@ -198,12 +205,6 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   void dispose() {
     _clickTimer?.cancel();
     _timer?.cancel();
-    for (var player in _clickPlayers) {
-      player.dispose();
-    }
-    for (var player in _specialClickPlayers) {
-      player.dispose();
-    }
     super.dispose();
   }
 
@@ -257,26 +258,27 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   }
 
   Widget _circle() {
-    final mediaQuery = MediaQuery.of(context);
-    final double screenWidth = mediaQuery.size.width;
-    return Container(
-      height: screenWidth * 0.6,
-      width: screenWidth * 0.6,
-      decoration: BoxDecoration(
-        color: metronome.color,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          '${metronome.currentBeat}',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: screenWidth * 0.12,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'BellotaText',
+    return Consumer<MetronomeController>(
+      builder: (context, metronome, child) {
+        return Container(
+          height: 200,
+          width: 200,
+          decoration: BoxDecoration(
+            color: metronome.color,
+            shape: BoxShape.circle,
           ),
-        ),
-      ),
+          child: Center(
+            child: Text(
+              '${metronome.currentBeat}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 50,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -341,7 +343,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
       onPressed: _toggleIsVibrateOn,
       icon: Icon(
         Icons.vibration,
-        color: _isVibrating ? Colors.black : Colors.grey,
+        color: vibrationController.isEnabled ? Colors.black : Colors.grey,
       ),
       iconSize: screenWidth * 0.1,
     );

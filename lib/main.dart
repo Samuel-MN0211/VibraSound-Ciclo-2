@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/bpm_scheduler_model.dart';
 import 'package:metronomo_definitivo/controllers/metronome_controller.dart';
+import 'package:metronomo_definitivo/controllers/sound_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
 import 'Models/genre_selected_model.dart';
 import 'Pages/home_page.dart';
 import 'Pages/multiple_metronome_page.dart';
+import 'controllers/vibration_controller.dart';
 
 void main() {
   TorchController().initialize();
@@ -22,6 +24,8 @@ class MetronomeApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => MetronomeController()),
         ChangeNotifierProvider(create: (context) => BpmSchedulerModel()),
         ChangeNotifierProvider(create: (context) => GenreSelectedModel()),
+        ChangeNotifierProvider(create: (context) => SoundController()),
+        ChangeNotifierProvider(create: (context) => VibrationController()),
       ],
       child: Consumer<MetronomeController>(
         builder: (context, samplesController, child) {
