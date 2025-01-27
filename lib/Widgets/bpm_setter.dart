@@ -11,8 +11,6 @@ class BpmSetter extends StatelessWidget {
         Provider.of<MetronomeController>(context);
     final GenreSelectedModel genreSelectedModel =
         Provider.of<GenreSelectedModel>(context);
-    // final IsPlayingModel isPlayingModel = Provider.of<IsPlayingModel>(context);
-
     final mediaQuery = MediaQuery.of(context);
     final double screenWidth = mediaQuery.size.width;
     final double screenHeight = mediaQuery.size.height;
@@ -57,7 +55,11 @@ class BpmSetter extends StatelessWidget {
           children: [
             IconButton(
               onPressed: () {
-                metronome.updateBpm(metronome.bpm - 1);
+                if (metronome.isPlaying) {
+                  metronome.updateBpmWhileIsPlaying(metronome.bpm - 1);
+                } else {
+                  metronome.updateBpm(metronome.bpm - 1);
+                }
                 genreSelectedModel.genreSelected = '';
               },
               icon: const Icon(Icons.remove),
@@ -74,7 +76,11 @@ class BpmSetter extends StatelessWidget {
             ),
             IconButton(
               onPressed: () {
-                metronome.updateBpm(metronome.bpm + 1);
+                if (metronome.isPlaying) {
+                  metronome.updateBpmWhileIsPlaying(metronome.bpm + 1);
+                } else {
+                  metronome.updateBpm(metronome.bpm + 1);
+                }
                 genreSelectedModel.genreSelected = '';
               },
               icon: const Icon(Icons.add),

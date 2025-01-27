@@ -9,8 +9,7 @@ import 'package:vibration/vibration.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../Models/bpm_scheduler_model.dart';
 import 'bpm_setter.dart';
-import '../Models/color_model.dart';
-import 'dart:collection'; // Import necessário para a Queue
+import 'dart:collection';
 
 class MetronomeInstance extends StatefulWidget {
   final Function? onStateChanged;
@@ -22,13 +21,9 @@ class MetronomeInstance extends StatefulWidget {
 }
 
 class MetronomeInstanceState extends State<MetronomeInstance> {
-  late MetronomeController metronome;
   bool _isTorchOn = false;
   bool _isVibrating = true;
   Timer? _clickTimer;
-  //int _currentTick = 0;
-  int _currentCycle = 0;
-  int _currentBeat = 0;
   int timerRunning = 0;
   Timer? _timer;
   late Queue<AudioPlayer> _clickPlayers;
@@ -38,6 +33,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
 
   // Controllers
   final TorchController _torchController = TorchController();
+  late MetronomeController metronome;
 
   @override
   void initState() {
@@ -74,8 +70,9 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   }
 
   void _onTick() {
-    _currentBeat++;
-    final colorModel = Provider.of<ColorModel>(context, listen: false);
+    setState(() {
+      metronome.updateCurrentBeat(metronome.currentBeat + 1);
+    });
 
     final bpmScheduler = Provider.of<BpmSchedulerModel>(context, listen: false);
 
@@ -99,35 +96,37 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
       }
     }
 
-    // if (bpmModel.hasChanged) {
-    //   _metronome.stop();
-    //   _metronome = Metronome(bpm: bpmModel.bpm, clicksPerBeat: clicksPerBeat);
-    //   _metronome.onTick(_onTick);
-    //   _metronome.start();
+    if (metronome.bpmHasChanged) {
+      metronome.stop();
+      metronome.newMetronome();
+      metronome.onTick(_onTick);
+      metronome.start();
 
-    //   interval = (60000 / (bpmModel.bpm * clicksPerBeat)).round();
-    //   vibrationDuration = interval ~/ 2;
-    //   bpmModel.resetChangeFlag();
-    // }
+      interval = (60000 / (metronome.bpm * metronome.clicksPerBeat)).round();
+      vibrationDuration = interval ~/ 2;
+      metronome.resetChangeFlag();
+    }
 
-    if (_currentBeat % metronome.clicksPerBeat == 1 ||
+    if (metronome.currentBeat % metronome.clicksPerBeat == 1 ||
         metronome.clicksPerBeat == 1) {
-      _currentCycle++;
-      _currentBeat = 1;
+      setState(() {
+        metronome.updateCurrentCycle(metronome.currentCycle + 1);
+        metronome.updateCurrentBeat(1);
+      });
       vibrationDuration = (interval * 0.8).round();
-      colorModel.changeToBlack();
+      metronome.changeToBlack();
       _torchOn(_isTorchOn, vibrationDuration);
       _playSound(_specialClickPlayers, _specialClickDuration, 'tick.wav');
     } else {
       _torchOn(_isTorchOn, vibrationDuration);
       _playSound(_clickPlayers, _clickDuration, 'clique.wav');
-      colorModel.changeToRandomColor();
+      metronome.changeToRandomColor();
     }
 
     _vibrateOn(_isVibrating, vibrationDuration);
 
-    if (_currentCycle > metronome.beatsPerMeasure) {
-      _currentCycle = 1;
+    if (metronome.currentCycle > metronome.beatsPerMeasure) {
+      metronome.updateCurrentCycle(1);
     }
   }
 
@@ -178,8 +177,8 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     setState(() {
       if (metronome.isPlaying) {
         metronome.stop();
-        _currentBeat = 0;
-        _currentCycle = 0;
+        metronome.updateCurrentCycle(0);
+        metronome.updateCurrentBeat(0);
         timerRunning = 0;
         _timer?.cancel();
         bpmScheduler.desactiveScheduler();
@@ -197,8 +196,14 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
 
   @override
   void dispose() {
-    metronome.dispose();
     _clickTimer?.cancel();
+    _timer?.cancel();
+    for (var player in _clickPlayers) {
+      player.dispose();
+    }
+    for (var player in _specialClickPlayers) {
+      player.dispose();
+    }
     super.dispose();
   }
 
@@ -254,17 +259,16 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
   Widget _circle() {
     final mediaQuery = MediaQuery.of(context);
     final double screenWidth = mediaQuery.size.width;
-    final colorModel = Provider.of<ColorModel>(context);
     return Container(
       height: screenWidth * 0.6,
       width: screenWidth * 0.6,
       decoration: BoxDecoration(
-        color: colorModel.backgroundColor,
+        color: metronome.color,
         shape: BoxShape.circle,
       ),
       child: Center(
         child: Text(
-          '$_currentBeat',
+          '${metronome.currentBeat}',
           style: TextStyle(
             color: Colors.white,
             fontSize: screenWidth * 0.12,
@@ -391,7 +395,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
                         children: List.generate(
                           metronome.beatsPerMeasure,
                           (index) => (index ==
-                                  (_currentCycle - 1) %
+                                  (metronome.currentCycle - 1) %
                                       metronome.beatsPerMeasure)
                               ? const SmallCircle(isWorking: true)
                               : const SmallCircle(isWorking: false),

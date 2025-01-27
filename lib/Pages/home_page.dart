@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:metronomo_definitivo/Models/color_model.dart';
 import 'package:metronomo_definitivo/controllers/metronome_controller.dart';
 import 'package:provider/provider.dart';
-// import '../Models/is_playing_model.dart';
 import '../Widgets/metronome_instance.dart';
 import '../Widgets/side_menu.dart' as side_menu;
 
@@ -15,7 +13,6 @@ class MetronomeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => ColorModel()),
         ChangeNotifierProvider(create: (context) => MetronomeController()),
       ],
       child: MaterialApp(
@@ -44,8 +41,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // final isPlayingModel = Provider.of<IsPlayingModel>(context);
-    final colorModel = Provider.of<ColorModel>(context);
     final metronome = Provider.of<MetronomeController>(context);
 
     return Stack(
@@ -54,7 +49,7 @@ class _HomePageState extends State<HomePage> {
         Container(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
-          color: colorModel.backgroundColor,
+          color: metronome.color,
         ),
         AnimatedContainer(
           curve: Curves.easeInQuart,

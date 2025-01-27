@@ -3,10 +3,8 @@ import 'package:metronomo_definitivo/Models/bpm_scheduler_model.dart';
 import 'package:metronomo_definitivo/controllers/metronome_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
-import 'Models/color_model.dart';
 import 'Models/genre_selected_model.dart';
 import 'Pages/home_page.dart';
-// import 'Models/is_playing_model.dart';
 import 'Pages/multiple_metronome_page.dart';
 
 void main() {
@@ -23,7 +21,6 @@ class MetronomeApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => MetronomeController()),
         ChangeNotifierProvider(create: (context) => BpmSchedulerModel()),
-        ChangeNotifierProvider(create: (context) => ColorModel()),
         ChangeNotifierProvider(create: (context) => GenreSelectedModel()),
       ],
       child: Consumer<MetronomeController>(
