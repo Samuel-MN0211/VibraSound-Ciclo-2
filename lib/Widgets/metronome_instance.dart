@@ -6,7 +6,6 @@ import 'package:metronomo_definitivo/controllers/sound_controller.dart';
 import 'package:metronomo_definitivo/controllers/torch_manager.dart';
 import 'package:metronomo_definitivo/controllers/vibration_controller.dart';
 import 'package:provider/provider.dart';
-import 'package:torch_controller/torch_controller.dart';
 import 'dart:async';
 import '../Models/bpm_scheduler_model.dart';
 import 'bpm_setter.dart';
