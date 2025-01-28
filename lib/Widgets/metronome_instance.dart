@@ -3,15 +3,13 @@ import 'package:metronomo_definitivo/Models/genre_selected_model.dart';
 import 'package:metronomo_definitivo/Widgets/ticks_compasso.dart';
 import 'package:metronomo_definitivo/controllers/metronome_controller.dart';
 import 'package:metronomo_definitivo/controllers/sound_controller.dart';
+import 'package:metronomo_definitivo/controllers/torch_manager.dart';
 import 'package:metronomo_definitivo/controllers/vibration_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
 import 'dart:async';
-import 'package:vibration/vibration.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../Models/bpm_scheduler_model.dart';
 import 'bpm_setter.dart';
-import 'dart:collection';
 
 class MetronomeInstance extends StatefulWidget {
   final Function? onStateChanged;
@@ -23,21 +21,14 @@ class MetronomeInstance extends StatefulWidget {
 }
 
 class MetronomeInstanceState extends State<MetronomeInstance> {
-  bool _isTorchOn = false;
-  bool _isVibrating = true;
   Timer? _clickTimer;
   int timerRunning = 0;
   Timer? _timer;
-  // late Queue<AudioPlayer> _clickPlayers;
-  // late Queue<AudioPlayer> _specialClickPlayers;
-  // late Duration _clickDuration;
-  // late Duration _specialClickDuration;
 
-  // Controllers
-  final TorchController _torchController = TorchController();
   late MetronomeController metronome;
   late SoundController soundController;
   late VibrationController vibrationController;
+  late TorchManager torchManager;
 
   @override
   void initState() {
@@ -46,35 +37,9 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     soundController = Provider.of<SoundController>(context, listen: false);
     vibrationController =
         Provider.of<VibrationController>(context, listen: false);
+    torchManager = Provider.of<TorchManager>(context, listen: false);
     soundController.preloadSounds();
   }
-
-  // void _preloadSounds() {
-  //   _clickPlayers = Queue<AudioPlayer>.from(List.generate(
-  //       10, (_) => AudioPlayer()..setSource(AssetSource('clique.wav'))));
-  //   _specialClickPlayers = Queue<AudioPlayer>.from(List.generate(
-  //       10, (_) => AudioPlayer()..setSource(AssetSource('tick.wav'))));
-
-  //   _clickPlayers.first.onDurationChanged.listen((Duration d) {
-  //     setState(() => _clickDuration = d);
-  //   });
-
-  //   _specialClickPlayers.first.onDurationChanged.listen((Duration d) {
-  //     setState(() => _specialClickDuration = d);
-  //   });
-  // }
-
-  // void _playSound(
-  //     Queue<AudioPlayer> players, Duration duration, String audioFile) {
-  //   final player = players.removeFirst();
-  //   player.seek(Duration.zero);
-  //   player.resume();
-
-  //   Future.delayed(duration * 0.95, () {
-  //     player.stop();
-  //     players.addLast(AudioPlayer()..setSource(AssetSource(audioFile)));
-  //   });
-  // }
 
   void _onTick() {
     setState(() {
@@ -122,10 +87,10 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
       });
       vibrationDuration = (interval * 0.8).round();
       metronome.changeToBlack();
-      _torchOn(_isTorchOn, vibrationDuration);
+      torchManager.torchOn(vibrationDuration);
       soundController.playSpecialClick();
     } else {
-      _torchOn(_isTorchOn, vibrationDuration);
+      torchManager.torchOn(vibrationDuration);
       soundController.playClick();
       metronome.changeToRandomColor();
     }
@@ -137,21 +102,6 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     }
   }
 
-  // void _vibrateOn(bool isVibratingOn, int vibrationDuration) {
-  //   if (isVibratingOn) {
-  //     Vibration.vibrate(duration: vibrationDuration);
-  //   }
-  // }
-
-  void _torchOn(bool isTorchOn, int vibrationDuration) {
-    if (isTorchOn) {
-      _torchController.toggle(intensity: 1);
-      Future.delayed(Duration(milliseconds: vibrationDuration), () {
-        _torchController.toggle();
-      });
-    }
-  }
-
   void _toggleIsVibrateOn() {
     setState(() {
       vibrationController.toggleVibration();
@@ -160,7 +110,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
 
   void _toggleIsTorchOn() {
     setState(() {
-      _isTorchOn = !_isTorchOn;
+      torchManager.toggleTorch();
     });
   }
 
@@ -379,7 +329,7 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
       onPressed: _toggleIsTorchOn,
       icon: Icon(
         Icons.flashlight_on,
-        color: _isTorchOn ? Colors.black : Colors.grey,
+        color: torchManager.isTorchOn ? Colors.black : Colors.grey,
       ),
       iconSize: screenWidth * 0.1,
     );
