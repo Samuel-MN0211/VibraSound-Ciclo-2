@@ -9,7 +9,7 @@ class VibrationController extends ChangeNotifier {
   }
 
   void vibrate(int duration) {
-    if (_isEnabled && Vibration.hasVibrator() != null) {
+    if (_isEnabled) {
       Vibration.vibrate(duration: duration);
     }
   }

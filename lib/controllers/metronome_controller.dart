@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:metronomo_definitivo/Models/metronome_model.dart';
+import 'package:metronomo_definitivo/Models/bpm_scheduler_model.dart';
+import 'package:metronomo_definitivo/controllers/sound_controller.dart';
+import 'package:metronomo_definitivo/controllers/torch_manager.dart';
+import 'package:metronomo_definitivo/controllers/vibration_controller.dart';
 
 class MetronomeController extends ChangeNotifier {
   Metronome _metronome =
       Metronome(bpm: 120, clicksPerBeat: 3, beatsPerMeasure: 4);
-
   bool _bpmHasChanged = false;
+
+  late SoundController soundController;
+  late VibrationController vibrationController;
+  late TorchManager torchManager;
+  late BpmSchedulerModel bpmScheduler;
+
+  MetronomeController(
+      {required this.soundController,
+      required this.vibrationController,
+      required this.torchManager,
+      required this.bpmScheduler});
 
   int get bpm => _metronome.currentBpm;
   int get clicksPerBeat => _metronome.currentClicksPerBeat;
@@ -18,6 +32,7 @@ class MetronomeController extends ChangeNotifier {
 
   void start() {
     _metronome.start();
+    _metronome.onTick(_onTick);
     notifyListeners();
   }
 
@@ -26,11 +41,54 @@ class MetronomeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void onTick(Function callback) {
-    _metronome.onTick(() {
-      callback();
-      notifyListeners();
-    });
+  void _onTick() {
+    updateCurrentBeat(_metronome.currentBeat + 1);
+
+    int interval =
+        (60000 / (_metronome.bpm * _metronome.clicksPerBeat)).round();
+    int vibrationDuration = interval ~/ 2;
+
+    if (bpmScheduler.isActivated) {
+      final now = DateTime.now();
+      if (now.difference(bpmScheduler.lastChange).inSeconds >=
+          bpmScheduler.secondsToMakeChange) {
+        updateBpm(_metronome.bpm + bpmScheduler.valueToChange);
+        bpmScheduler.lastChange = now;
+
+        restartMetronome();
+      }
+    }
+
+    if (_bpmHasChanged) {
+      restartMetronome();
+      resetChangeFlag();
+    }
+
+    if (_metronome.currentBeat % _metronome.clicksPerBeat == 1 ||
+        _metronome.clicksPerBeat == 1) {
+      updateCurrentCycle(_metronome.currentCycle + 1);
+      updateCurrentBeat(1);
+      vibrationDuration = (interval * 0.8).round();
+      changeToBlack();
+      torchManager.torchOn(vibrationDuration);
+      soundController.playSpecialClick();
+    } else {
+      torchManager.torchOn(vibrationDuration);
+      soundController.playClick();
+      changeToRandomColor();
+    }
+
+    vibrationController.vibrate(vibrationDuration);
+
+    if (_metronome.currentCycle > _metronome.beatsPerMeasure) {
+      updateCurrentCycle(1);
+    }
+  }
+
+  void restartMetronome() {
+    stop();
+    newMetronome();
+    start();
   }
 
   void newMetronome() {
@@ -70,11 +128,6 @@ class MetronomeController extends ChangeNotifier {
 
   void updateCurrentCycle(int value) {
     _metronome.currentCycle = value;
-    notifyListeners();
-  }
-
-  void updateIsPlaying(bool value) {
-    _metronome.isPlaying = value;
     notifyListeners();
   }
 

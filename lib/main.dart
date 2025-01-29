@@ -22,23 +22,25 @@ class MetronomeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => MetronomeController()),
-        ChangeNotifierProvider(create: (context) => BpmSchedulerModel()),
-        ChangeNotifierProvider(create: (context) => GenreSelectedModel()),
         ChangeNotifierProvider(create: (context) => SoundController()),
         ChangeNotifierProvider(create: (context) => VibrationController()),
         ChangeNotifierProvider(create: (context) => TorchManager()),
+        ChangeNotifierProvider(create: (context) => BpmSchedulerModel()),
+        ChangeNotifierProvider(
+          create: (context) => MetronomeController(
+            soundController: context.read<SoundController>(),
+            vibrationController: context.read<VibrationController>(),
+            torchManager: context.read<TorchManager>(),
+            bpmScheduler: context.read<BpmSchedulerModel>(),
+          ),
+        ),
+        ChangeNotifierProvider(create: (context) => GenreSelectedModel()),
       ],
-      child: Consumer<MetronomeController>(
-        builder: (context, samplesController, child) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: const HomePage(),
-            routes: {
-              '/multiple_metronomes': (context) =>
-                  const MultipleMetronomePage(),
-            },
-          );
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: const HomePage(),
+        routes: {
+          '/multiple_metronomes': (context) => const MultipleMetronomePage(),
         },
       ),
     );

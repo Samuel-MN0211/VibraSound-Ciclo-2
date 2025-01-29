@@ -40,67 +40,6 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
     soundController.preloadSounds();
   }
 
-  void _onTick() {
-    setState(() {
-      metronome.updateCurrentBeat(metronome.currentBeat + 1);
-    });
-
-    final bpmScheduler = Provider.of<BpmSchedulerModel>(context, listen: false);
-
-    int interval = (60000 / (metronome.bpm * metronome.clicksPerBeat)).round();
-    int vibrationDuration = interval ~/ 2;
-
-    if (bpmScheduler.isActivated) {
-      final now = DateTime.now();
-      if (now.difference(bpmScheduler.lastChange).inSeconds >=
-          bpmScheduler.secondsToMakeChange) {
-        metronome.updateBpm(metronome.bpm + bpmScheduler.valueToChange);
-        bpmScheduler.lastChange = now;
-
-        metronome.stop();
-        metronome.newMetronome();
-        metronome.onTick(_onTick);
-        metronome.start();
-
-        interval = (60000 / (metronome.bpm * metronome.clicksPerBeat)).round();
-        vibrationDuration = interval ~/ 2;
-      }
-    }
-
-    if (metronome.bpmHasChanged) {
-      metronome.stop();
-      metronome.newMetronome();
-      metronome.onTick(_onTick);
-      metronome.start();
-
-      interval = (60000 / (metronome.bpm * metronome.clicksPerBeat)).round();
-      vibrationDuration = interval ~/ 2;
-      metronome.resetChangeFlag();
-    }
-
-    if (metronome.currentBeat % metronome.clicksPerBeat == 1 ||
-        metronome.clicksPerBeat == 1) {
-      setState(() {
-        metronome.updateCurrentCycle(metronome.currentCycle + 1);
-        metronome.updateCurrentBeat(1);
-      });
-      vibrationDuration = (interval * 0.8).round();
-      metronome.changeToBlack();
-      torchManager.torchOn(vibrationDuration);
-      soundController.playSpecialClick();
-    } else {
-      torchManager.torchOn(vibrationDuration);
-      soundController.playClick();
-      metronome.changeToRandomColor();
-    }
-
-    vibrationController.vibrate(vibrationDuration);
-
-    if (metronome.currentCycle > metronome.beatsPerMeasure) {
-      metronome.updateCurrentCycle(1);
-    }
-  }
-
   void _toggleIsVibrateOn() {
     setState(() {
       vibrationController.toggleVibration();
@@ -143,7 +82,6 @@ class MetronomeInstanceState extends State<MetronomeInstance> {
           bpmScheduler.lastChange = DateTime.now();
         }
         metronome.newMetronome();
-        metronome.onTick(_onTick);
         metronome.start();
         _timerRunning();
       }
