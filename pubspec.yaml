@@ -17,6 +17,7 @@ dependencies:
   provider: ^6.1.2
   wear:
     path: C:/Flutter Packages/flutter_wear_plugin-master
+  watch_connectivity: ^0.2.1
 
 dev_dependencies:
   flutter_test:

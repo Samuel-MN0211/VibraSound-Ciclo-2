@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wear/wear.dart';
+import 'package:metronomo_definitivo/Widgets/active_component.dart';
 
 class WearPage extends StatelessWidget {
   const WearPage({super.key});
@@ -22,9 +23,7 @@ class WearPage extends StatelessWidget {
   viewWatchActive() {
     return const Scaffold(
       backgroundColor: Colors.blue,
-      body: Center(
-        child: Text('ativo', style: TextStyle(color: Colors.white)),
-      ),
+      body: ActiveComponent(),
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:metronomo_definitivo/Models/bpm_scheduler_model.dart';
 import 'package:metronomo_definitivo/controllers/sound_controller.dart';
 import 'package:metronomo_definitivo/controllers/torch_manager.dart';
 import 'package:metronomo_definitivo/controllers/vibration_controller.dart';
+import 'package:watch_connectivity/watch_connectivity.dart';
 
 class MetronomeController extends ChangeNotifier {
   Metronome _metronome =
@@ -14,6 +15,8 @@ class MetronomeController extends ChangeNotifier {
   late VibrationController vibrationController;
   late TorchManager torchManager;
   late BpmSchedulerModel bpmScheduler;
+
+  final WatchConnectivity _watch = WatchConnectivity();
 
   MetronomeController(
       {required this.soundController,
@@ -33,6 +36,7 @@ class MetronomeController extends ChangeNotifier {
   void start() {
     _metronome.start();
     _metronome.onTick(_onTick);
+    sendBpm();
     notifyListeners();
   }
 
@@ -148,5 +152,10 @@ class MetronomeController extends ChangeNotifier {
     } else {
       _metronome.color = Colors.green;
     }
+  }
+
+  void sendBpm() {
+    final message = {'bpm': _metronome.bpm};
+    _watch.sendMessage(message);
   }
 }
