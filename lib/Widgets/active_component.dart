@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:metronomo_definitivo/controllers/watch_metronome_controller.dart';
@@ -20,7 +18,6 @@ class _ActiveComponentState extends State<ActiveComponent>
   int _lastBpm = 0;
   int _lastClicksPerBeat = 0;
 
-  // Marcadores de tempo para vibração
   int _lastTickTime = 0;
   int _tickInterval = 1000; // Padrão 1 segundo
   int _tickCount = 0;
@@ -31,7 +28,6 @@ class _ActiveComponentState extends State<ActiveComponent>
     _controller = Provider.of<WatchMetronomeController>(context, listen: false);
     _controller.addListener(_onControllerUpdate);
 
-    // Inicializa o ticker para timing mais preciso
     _ticker = createTicker(_onTick);
 
     if (_isVibrating) {
@@ -46,10 +42,8 @@ class _ActiveComponentState extends State<ActiveComponent>
       _lastBpm = _controller.metronome!.bpm;
       _lastClicksPerBeat = _controller.metronome!.clicksPerBeat;
 
-      // Recalcula o intervalo
       _updateTickInterval();
 
-      // Reinicia a contagem
       _tickCount = 0;
       _lastTickTime = DateTime.now().millisecondsSinceEpoch;
 
@@ -61,7 +55,6 @@ class _ActiveComponentState extends State<ActiveComponent>
 
   void _updateTickInterval() {
     if (_controller.metronome != null) {
-      // Intervalo entre batidas em milissegundos
       _tickInterval = (60000 /
               (_controller.metronome!.bpm *
                   _controller.metronome!.clicksPerBeat))
@@ -77,14 +70,10 @@ class _ActiveComponentState extends State<ActiveComponent>
     int now = DateTime.now().millisecondsSinceEpoch;
     int elapsed = now - _lastTickTime;
 
-    // Verifica se já passou o tempo suficiente para a próxima vibração
     if (elapsed >= _tickInterval) {
       _controller.vibrate();
       _lastTickTime = now;
       _tickCount++;
-
-      // Debug info
-      print("Vibração #$_tickCount - BPM: ${_controller.metronome!.bpm}");
     }
   }
 

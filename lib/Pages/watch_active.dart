@@ -31,7 +31,7 @@ class _WatchActiveState extends State<WatchActive> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Colors.blue,
       body: Center(
         child: Text('120', style: TextStyle(color: Colors.white)),
