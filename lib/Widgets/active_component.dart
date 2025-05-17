@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:watch_connectivity/watch_connectivity.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:metronomo_definitivo/controllers/watch_metronome_controller.dart';
+import 'package:provider/provider.dart';
 
 class ActiveComponent extends StatefulWidget {
   const ActiveComponent({super.key});
@@ -8,40 +12,166 @@ class ActiveComponent extends StatefulWidget {
   State<ActiveComponent> createState() => _ActiveComponentState();
 }
 
-class _ActiveComponentState extends State<ActiveComponent> {
-  final _watch = WatchConnectivity();
-  int _bpm = 0;
+class _ActiveComponentState extends State<ActiveComponent>
+    with SingleTickerProviderStateMixin {
+  late WatchMetronomeController _controller;
+  Ticker? _ticker;
+  bool _isVibrating = true;
+  int _lastBpm = 0;
+  int _lastClicksPerBeat = 0;
+
+  // Marcadores de tempo para vibração
+  int _lastTickTime = 0;
+  int _tickInterval = 1000; // Padrão 1 segundo
+  int _tickCount = 0;
 
   @override
   void initState() {
     super.initState();
+    _controller = Provider.of<WatchMetronomeController>(context, listen: false);
+    _controller.addListener(_onControllerUpdate);
 
-    _watch.messageStream.listen((message) {
-      if (message.containsKey('bpm')) {
-        setState(() {
-          _bpm = message['bpm'];
-        });
-      }
-    });
+    // Inicializa o ticker para timing mais preciso
+    _ticker = createTicker(_onTick);
 
-    _watch.contextStream.listen((context) {
-      if (context.containsKey('bpm')) {
-        setState(() {
-          _bpm = context['bpm'];
-        });
+    if (_isVibrating) {
+      _startVibrationTicker();
+    }
+  }
+
+  void _onControllerUpdate() {
+    if (_controller.metronome != null &&
+        (_lastBpm != _controller.metronome!.bpm ||
+            _lastClicksPerBeat != _controller.metronome!.clicksPerBeat)) {
+      _lastBpm = _controller.metronome!.bpm;
+      _lastClicksPerBeat = _controller.metronome!.clicksPerBeat;
+
+      // Recalcula o intervalo
+      _updateTickInterval();
+
+      // Reinicia a contagem
+      _tickCount = 0;
+      _lastTickTime = DateTime.now().millisecondsSinceEpoch;
+
+      if (_isVibrating && _ticker != null && !_ticker!.isTicking) {
+        _startVibrationTicker();
       }
+    }
+  }
+
+  void _updateTickInterval() {
+    if (_controller.metronome != null) {
+      // Intervalo entre batidas em milissegundos
+      _tickInterval = (60000 /
+              (_controller.metronome!.bpm *
+                  _controller.metronome!.clicksPerBeat))
+          .round();
+      print(
+          "Novo intervalo calculado: $_tickInterval ms (BPM: ${_controller.metronome!.bpm})");
+    }
+  }
+
+  void _onTick(Duration elapsed) {
+    if (!_isVibrating || _controller.metronome == null) return;
+
+    int now = DateTime.now().millisecondsSinceEpoch;
+    int elapsed = now - _lastTickTime;
+
+    // Verifica se já passou o tempo suficiente para a próxima vibração
+    if (elapsed >= _tickInterval) {
+      _controller.vibrate();
+      _lastTickTime = now;
+      _tickCount++;
+
+      // Debug info
+      print("Vibração #$_tickCount - BPM: ${_controller.metronome!.bpm}");
+    }
+  }
+
+  void _startVibrationTicker() {
+    _updateTickInterval();
+    _lastTickTime = DateTime.now().millisecondsSinceEpoch;
+    _tickCount = 0;
+    _ticker?.start();
+
+    setState(() {
+      _isVibrating = true;
     });
+  }
+
+  void _stopVibrationTicker() {
+    _ticker?.stop();
+    setState(() {
+      _isVibrating = false;
+    });
+  }
+
+  void _toggleVibration() {
+    if (_isVibrating) {
+      _stopVibrationTicker();
+    } else {
+      _startVibrationTicker();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onControllerUpdate);
+    _ticker?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(
-          'BPM: $_bpm',
-          style: const TextStyle(fontSize: 32),
-        ),
-      ),
+    return Consumer<WatchMetronomeController>(
+      builder: (context, controller, child) {
+        if (controller.metronome == null) {
+          return const Scaffold(
+            body: Center(
+              child: Text('Aguardando dados do metronome...'),
+            ),
+          );
+        }
+
+        return Scaffold(
+          backgroundColor: controller.metronome!.color,
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'BPM: ${controller.metronome!.bpm}',
+                  style: const TextStyle(fontSize: 32),
+                ),
+                Text(
+                  'Batida: ${controller.metronome!.currentBeat}/${controller.metronome!.clicksPerBeat}',
+                  style: const TextStyle(fontSize: 24),
+                ),
+                Text(
+                  'Compasso: ${controller.metronome!.currentCycle}/${controller.metronome!.beatsPerMeasure}',
+                  style: const TextStyle(fontSize: 24),
+                ),
+                const SizedBox(height: 20),
+                IconButton(
+                  onPressed: _toggleVibration,
+                  icon: Icon(
+                    Icons.vibration,
+                    size: 36,
+                    color: _isVibrating ? Colors.white : Colors.grey,
+                  ),
+                ),
+                Text(
+                  _isVibrating ? 'Vibração ON' : 'Vibração OFF',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: _isVibrating ? Colors.white : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
@@ -13,13 +14,14 @@ class Metronome {
   int currentBeat;
   int currentCycle;
 
-  Metronome(
-      {required this.bpm,
-      this.clicksPerBeat = 1,
-      this.beatsPerMeasure = 1,
-      this.isPlaying = false,
-      this.currentBeat = 0,
-      this.currentCycle = 0});
+  Metronome({
+    required this.bpm,
+    this.clicksPerBeat = 1,
+    this.beatsPerMeasure = 1,
+    this.isPlaying = false,
+    this.currentBeat = 0,
+    this.currentCycle = 0,
+  });
 
   get ifIsPlaying => isPlaying;
   get currentBpm => bpm;
@@ -50,4 +52,31 @@ class Metronome {
   void dispose() {
     _timer?.cancel();
   }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'bpm': bpm,
+      'clicksPerBeat': clicksPerBeat,
+      'beatsPerMeasure': beatsPerMeasure,
+      'isPlaying': isPlaying,
+      'currentBeat': currentBeat,
+      'currentCycle': currentCycle,
+    };
+  }
+
+  factory Metronome.fromMap(Map<String, dynamic> map) {
+    return Metronome(
+      bpm: map['bpm'] as int,
+      clicksPerBeat: map['clicksPerBeat'] as int,
+      beatsPerMeasure: map['beatsPerMeasure'] as int,
+      isPlaying: map['isPlaying'] as bool,
+      currentBeat: map['currentBeat'] as int,
+      currentCycle: map['currentCycle'] as int,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory Metronome.fromJson(String source) =>
+      Metronome.fromMap(json.decode(source) as Map<String, dynamic>);
 }
