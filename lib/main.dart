@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:metronomo_definitivo/Models/beats_model.dart';
-import 'package:metronomo_definitivo/Models/bpm_model.dart';
 import 'package:metronomo_definitivo/Models/bpm_scheduler_model.dart';
+import 'package:metronomo_definitivo/controllers/metronome_controller.dart';
+import 'package:metronomo_definitivo/controllers/sound_controller.dart';
+import 'package:metronomo_definitivo/controllers/torch_manager.dart';
+import 'package:metronomo_definitivo/controllers/watch_metronome_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:torch_controller/torch_controller.dart';
-import 'Models/color_model.dart';
-import 'Models/compasso_model.dart';
 import 'Models/genre_selected_model.dart';
 import 'Pages/home_page.dart';
-import 'Models/is_playing_model.dart';
 import 'Pages/multiple_metronome_page.dart';
+import 'controllers/vibration_controller.dart';
 
 void main() {
   TorchController().initialize();
@@ -23,24 +23,26 @@ class MetronomeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => SoundController()),
+        ChangeNotifierProvider(create: (context) => VibrationController()),
+        ChangeNotifierProvider(create: (context) => TorchManager()),
         ChangeNotifierProvider(create: (context) => BpmSchedulerModel()),
-        ChangeNotifierProvider(create: (context) => BpmModel()),
-        ChangeNotifierProvider(create: (context) => CompassoModel()),
-        ChangeNotifierProvider(create: (context) => BeatsModel()),
-        ChangeNotifierProvider(create: (context) => IsPlayingModel()),
-        ChangeNotifierProvider(create: (context) => ColorModel()),
+        ChangeNotifierProvider(create: (_) => WatchMetronomeController()),
+        ChangeNotifierProvider(
+          create: (context) => MetronomeController(
+            soundController: context.read<SoundController>(),
+            vibrationController: context.read<VibrationController>(),
+            torchManager: context.read<TorchManager>(),
+            bpmScheduler: context.read<BpmSchedulerModel>(),
+          ),
+        ),
         ChangeNotifierProvider(create: (context) => GenreSelectedModel()),
       ],
-      child: Consumer<BpmModel>(
-        builder: (context, samplesController, child) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: const HomePage(),
-            routes: {
-              '/multiple_metronomes': (context) =>
-                  const MultipleMetronomePage(),
-            },
-          );
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: const HomePage(),
+        routes: {
+          '/multiple_metronomes': (context) => const MultipleMetronomePage(),
         },
       ),
     );
